@@ -6,7 +6,6 @@ import com.oficina_dev.backend.models.DonationItem.DonationItem;
 import com.oficina_dev.backend.models.Size.Size;
 import com.oficina_dev.backend.models.TransferItem.TransferItem;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -53,10 +52,10 @@ public class Item {
     @JoinColumn(name = "id_size", nullable = false)
     private Size size;
 
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<DonationItem> donationItems;
 
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TransferItem> transferItems;
 
     public Item(String name, Integer quantity,Character sex, Category category, Size size) {
@@ -75,11 +74,18 @@ public class Item {
     }
 
     public void setSex(Character sex) {
-        char valid = Character.toLowerCase(sex);
-        if (valid != 'm' && valid != 'f') {
-            throw new IllegalArgumentException("Sex must be 'm' or 'f'");
+        if (sex == null) {
+            throw new IllegalArgumentException("O sexo do item não pode ser vazio.");
         }
-        this.sex = Character.valueOf(valid);
+        
+        // Converte o caractere para minúsculo automaticamente ('M' vira 'm')
+        Character normalizedSex = Character.toLowerCase(sex); 
+        
+        if (normalizedSex == 'm' || normalizedSex == 'f' || normalizedSex == 'u') {
+            this.sex = normalizedSex;
+        } else {
+            throw new IllegalArgumentException("O sexo do item deve ser 'm', 'f' ou 'u'");
+        }
     }
 
     public void setName(String name) {

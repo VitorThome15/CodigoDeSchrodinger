@@ -6,6 +6,8 @@ import styles from "./lista.module.css";
 import { useRouter } from "next/navigation";
 import modalStyles from "./lista.module.css";
 
+const API_URL = "http://localhost:8080/api/givers";
+
 export default function ListaDoadores() {
   const [doadores, setDoadores] = useState([]); // [{id, nomeCompleto, email, telefoneCelular, ...}]
   const [loading, setLoading] = useState(true);
@@ -19,28 +21,29 @@ export default function ListaDoadores() {
   useEffect(() => {
     setLoading(true);
     setError("");
-    try {
-      const mock = JSON.parse(localStorage.getItem('mockDoadores') || '[]');
-      setDoadores(mock);
-    } catch (err) {
-      setError("Erro ao carregar doadores do mock");
-    } finally {
-      setLoading(false);
-    }
+    fetch(API_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro na rede");
+        return res.json();
+      })
+      .then((data) => setDoadores(Array.isArray(data) ? data : []))
+      .catch((err) => setError("Erro ao carregar doadores do backend"))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleEdit = (id) => {
     router.push(`/cadastrodoador/editar/${id}`);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Tem certeza que deseja excluir este doador?")) return;
     setLoading(true);
     setError("");
     try {
-      const novos = doadores.filter((d) => d.id !== id);
-      setDoadores(novos);
-      localStorage.setItem('mockDoadores', JSON.stringify(novos));
+      const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro ao excluir");
+      
+      setDoadores(doadores.filter((d) => d.id !== id));
       alert("Doador excluído com sucesso!");
     } catch (err) {
       setError("Erro ao excluir doador");
@@ -129,10 +132,10 @@ export default function ListaDoadores() {
                 ) : (
                   doadores.map((d) => (
                     <tr key={d.id}>
-                      <td>{d.nomeCompleto}</td>
-                      <td>{d.email}</td>
-                      <td>{d.telefoneCelular}</td>
-                      <td>–</td>
+                      <td>{d.person?.name || "Sem nome"}</td>
+                      <td>{d.person?.email || "Sem e-mail"}</td>
+                      <td>{d.person?.phone || "Sem telefone"}</td>
+                      <td>{d.person?.cpf || "–"}</td>
                       <td className={styles.actionButtons}>
                         <button
                           className={styles.editButton}

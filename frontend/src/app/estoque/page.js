@@ -139,7 +139,7 @@ export default function EstoquePage() {
         <MenuBar hasNotification={hasNotification} />
         <main className={styles.main}>
           <h1 className={styles.titulo}>Controle de Estoque</h1>
-          <div style={{ width: "100%", display: "flex", justifyContent: "flex-end", marginBottom: 24 }}>
+          <div className={styles.actionsHeader}>
             <button className={`${styles.btn} ${styles.btnAdicionar}`} onClick={() => setShowAddModal(true)}>
               + Adicionar Produto
             </button>

@@ -45,14 +45,6 @@ public class AddressService {
 
     public AddressResponseDto create(AddressRequestDto addressRequestDto) {
         Address address = this.addressMapper.toEntity(addressRequestDto);
-        if(this.addressRepository.existsByStreetAndNumberAndNeighborhood(
-                address.getStreet(),
-                address.getNumber(),
-                address.getNeighborhood()
-        )) {
-            String addressAlreadyExistsMessage = "Address already exists";
-            throw new EntityAlreadyExists(addressAlreadyExistsMessage);
-        }
         Address savedAddress = this.addressRepository.saveAndFlush(address);
         return this.addressMapper.toResponse(savedAddress);
     }

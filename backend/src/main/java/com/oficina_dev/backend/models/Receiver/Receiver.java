@@ -43,10 +43,10 @@ public class Receiver {
     @JoinColumn(name = "id_person", referencedColumnName = "id")
     private Person person;
 
-    @OneToMany(mappedBy = "receiver")
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ReceiverLimit> receiverLimits;
 
-    @OneToMany(mappedBy = "receiver")
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Transfer> transfers;
 
     public Receiver(String nif, Boolean isFit, Person person) {

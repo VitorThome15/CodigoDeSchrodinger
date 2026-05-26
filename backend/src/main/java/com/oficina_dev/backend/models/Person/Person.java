@@ -50,13 +50,13 @@ public class Person {
     @JoinColumn(name = "id_address", referencedColumnName = "id", unique = true)
     private Address address;
 
-    @OneToOne(mappedBy = "person")
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
     private Giver giver;
 
-    @OneToOne(mappedBy = "person")
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
     private Voluntary voluntary;
 
-    @OneToOne(mappedBy = "person")
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
     private Receiver receiver;
 
     public Person(){
