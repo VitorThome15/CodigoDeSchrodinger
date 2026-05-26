@@ -391,3 +391,8 @@
   font-size: 1.08rem;
   margin: 0;
 }
+.cancelButton {
+  background: linear-gradient(135deg, #f3f4f6 0%, #d6d8dd 100%);
+  color: #333;
+  border: 1px solid #b8babe;
+}

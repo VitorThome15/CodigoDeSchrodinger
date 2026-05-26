@@ -194,7 +194,7 @@ export default function ListaVoluntarios() {
                 <input id="edit_pontoReferencia" name="pontoReferencia" value={editForm.pontoReferencia} onChange={handleEditChange} placeholder="Em frente ao parque" />
               </div>
               <div className={modalStyles.modalButtonGroup}>
-                <button type="button" onClick={closeEditModal} style={{ background: '#aaa', color: '#fff' }}>Cancelar</button>
+                <button type="button" className={modalStyles.cancelButton} onClick={closeEditModal}>Cancelar</button>
                 <button type="submit" disabled={editLoading}>{editLoading ? "Salvando..." : "Salvar Alterações"}</button>
               </div>
               {editError && <div className={modalStyles.errorMessage}>{editError}</div>}

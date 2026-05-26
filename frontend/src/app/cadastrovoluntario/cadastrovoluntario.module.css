@@ -90,14 +90,34 @@
 }
 
 .formulario button {
-  grid-column: 1 / -1;
-  margin: 32px auto 0 auto;
   font-size: 1.2rem;
   padding: 18px 0;
-  width: 60%;
+  width: 100%;
   display: block;
   background: #18132b;
   color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.buttonGroup {
+  grid-column: 1 / -1;
+  margin: 32px auto 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
+.buttonGroup button {
+  flex: 1;
+  max-width: 260px;
+}
+
+.cancelButton {
+  background: #e0e0e0;
+  color: #18132b;
+  border: 1px solid #bdbdbd;
 }
 
 .errorMessage {
