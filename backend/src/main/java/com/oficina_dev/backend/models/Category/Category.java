@@ -35,7 +35,7 @@ public class Category {
     @Column(name = "update_at")
     private ZonedDateTime updateAt;
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Item> items;
 
     public Category(String name) {

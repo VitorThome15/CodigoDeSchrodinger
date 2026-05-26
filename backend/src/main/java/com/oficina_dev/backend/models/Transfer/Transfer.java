@@ -40,7 +40,7 @@ public class Transfer {
     @JoinColumn(name = "id_voluntary")
     private Voluntary voluntary;
 
-    @OneToMany(mappedBy = "transfer")
+    @OneToMany(mappedBy = "transfer", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TransferItem> transferItems;
 
     public Transfer(Receiver receiver, Voluntary voluntary) {

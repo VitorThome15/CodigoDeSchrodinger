@@ -38,7 +38,7 @@ public class Giver {
     @JoinColumn(name = "id_person", referencedColumnName = "id")
     private Person person;
 
-    @OneToMany(mappedBy = "giver")
+    @OneToMany(mappedBy = "giver", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Donation> donations;
 
     public Giver(Person person) {

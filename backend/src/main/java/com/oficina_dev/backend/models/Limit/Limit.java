@@ -39,7 +39,7 @@ public class Limit {
     @Column(name = "updated_at")
     private ZonedDateTime updatedAt;
 
-    @OneToMany(mappedBy = "limit")
+    @OneToMany(mappedBy = "limit", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ReceiverLimit> receiverLimitList;
 
     public Limit(Integer month, Integer year, Integer limitQuantity) {
