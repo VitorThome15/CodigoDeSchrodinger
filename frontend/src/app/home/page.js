@@ -9,10 +9,9 @@ export default function Home() {
   // Simulação: troque para true/false para testar
   const hasNotification = true;
 
-  // Opções de navegação para o grid (removido Usuários)
+  // Opções de navegação para o grid (removido Usuários e Cadastro)
   const navOptions = [
     { href: '/home', label: 'Home', icon: <FaHome /> },
-    { href: '/cadastrooption', label: 'Cadastro', icon: <FaUserPlus /> },
     { href: '/estoque', label: 'Estoque', icon: <FaBoxes /> },
     { href: '/cadastrodoador/lista', label: 'Doadores', icon: <FaHandHoldingHeart /> },
     { href: '/cadastrobeneficiario/lista', label: 'Beneficiários', icon: <FaUsers /> },
