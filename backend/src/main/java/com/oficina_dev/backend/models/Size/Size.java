@@ -34,7 +34,7 @@ public class Size {
     @Column(name = "updated_at")
     private ZonedDateTime updatedAt;
 
-    @OneToMany(mappedBy = "size")
+    @OneToMany(mappedBy = "size", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Item> items;
 
     public  Size(String name) {

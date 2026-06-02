@@ -1,5 +1,6 @@
 package com.oficina_dev.backend.models.Voluntary;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.oficina_dev.backend.models.Donation.Donation;
 import com.oficina_dev.backend.models.Person.Person;
 import com.oficina_dev.backend.models.Transfer.Transfer;
@@ -39,14 +40,15 @@ public class Voluntary {
     @Column(name = "updated_at")
     private ZonedDateTime updatedAt;
 
+    @JsonSetter
     @OneToOne
     @JoinColumn(name = "id_person", referencedColumnName = "id")
     private Person person;
 
-    @OneToMany(mappedBy = "voluntary")
+    @OneToMany(mappedBy = "voluntary", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Donation> donations;
 
-    @OneToMany(mappedBy = "voluntary")
+    @OneToMany(mappedBy = "voluntary", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Transfer> transfers;
 
     public Voluntary(Person person, String password, Boolean isActive) {
@@ -66,4 +68,7 @@ public class Voluntary {
         this.isActive = b;
     }
 
+    public void setPerson(Person person) {
+        this.person = person;
+    }
 }

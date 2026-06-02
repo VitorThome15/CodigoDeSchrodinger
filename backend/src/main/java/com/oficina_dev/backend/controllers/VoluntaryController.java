@@ -38,7 +38,7 @@ public class VoluntaryController {
         return ResponseEntity.ok(voluntaryResponseDto);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<VoluntaryResponseDto> create(@RequestBody @Valid VoluntaryRequestDto voluntaryRequestDto) {
         logger.info("Creating new voluntary");
         VoluntaryResponseDto voluntaryResponseDto = this.voluntaryService.create(voluntaryRequestDto);

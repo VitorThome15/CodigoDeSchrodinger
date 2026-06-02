@@ -43,7 +43,7 @@ public class Donation {
     @JoinColumn(name = "id_voluntary")
     private Voluntary voluntary;
 
-    @OneToMany(mappedBy = "donation")
+    @OneToMany(mappedBy = "donation", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<DonationItem> donationItems;
 
     public Donation(Giver giver, Voluntary voluntary) {

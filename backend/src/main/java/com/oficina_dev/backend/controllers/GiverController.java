@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,12 @@ public class GiverController {
         GiverResponseDto giverResponseDto = this.giverService.getById(id);
         logger.info("Giver found with ID: {}", giverResponseDto.id());
         return ResponseEntity.ok(giverResponseDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        this.giverService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping
