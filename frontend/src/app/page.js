@@ -6,7 +6,7 @@ import Link from "next/link";
 
 // Usuário administrativo padrão
 const ADMIN_USER = "adm";
-const TEST_USER_EMAIL = "vitorthome@alunos.utfpr.edu.br";
+const TEST_USER_EMAIL = "adm@gmail.com";
 
 export default function Login() {
   const [error, setError] = useState("");
