@@ -21,7 +21,21 @@ export default function Login() {
     const usuario = form[0].value;
     const senha = form[1].value;
     
-    // Login com usuário adm consultando o backend
+    // 🚨 --- INÍCIO DA TRAPAÇA (MODO DESENVOLVEDOR) --- 🚨
+    if (usuario === ADMIN_USER && senha === "1234") {
+      // Simulamos a resposta do backend e liberamos o acesso na hora!
+      localStorage.setItem("userId", "id-teste-123");
+      localStorage.setItem("username", ADMIN_USER);
+      localStorage.setItem("userEmail", TEST_USER_EMAIL);
+      localStorage.setItem("userPhone", "00000000000");
+      
+      alert("Acesso Liberado (Modo Desenvolvedor)!");
+      window.location.href = "/home";
+      return; // O 'return' impede que ele tente chamar o Java
+    }
+    // 🚨 --- FIM DA TRAPAÇA --- 🚨
+
+    // Caso você tente logar com outro usuário, ele fará o fluxo normal:
     if (usuario !== ADMIN_USER) {
       setError("Usuário ou senha incorretos.");
       setLoading(false);
@@ -29,7 +43,7 @@ export default function Login() {
     }
     
     try {
-      // Fazer login com email do usuário adm
+      // Fazer login com email do usuário adm (Fluxo Real)
       const response = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -1,400 +1,233 @@
-/* src/app/listabeneficiarios/listabeneficiarios.module.css */
-
-/*
-  Este arquivo CSS Modules deve conter apenas classes que serão usadas
-  especificamente neste componente. As variáveis :root, html, body, input,
-  button, label, etc., DEVEM estar no seu arquivo CSS GLOBAL (ex: globals.css).
-*/
-
-/* Container Geral da Página - Reutiliza do CSS do formulário, mas adapta se necessário */
+/* 1. CONTAINER GERAL */
 .containerGeral {
-    min-height: 100vh;
-    /* background: var(--color-bg); removido, já no body global */
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centraliza horizontalmente o conteúdo principal */
-    justify-content: flex-start;
-    padding-bottom: 40px; /* Espaço para o final da página */
-  }
-  
-  /* Wrapper para o conteúdo da lista (centraliza e controla a largura máxima) */
-  .contentWrapper {
-    flex-grow: 1; /* Permite que o wrapper ocupe o espaço restante */
-    width: 100%;
-    max-width: 1200px; /* Largura máxima para a tabela */
-    padding: 20px; /* Padding nas laterais em telas maiores */
-    display: flex;
-    justify-content: center; /* Centraliza o listContainer dentro do wrapper */
-    align-items: flex-start; /* Alinha o conteúdo ao topo */
-  }
-  
-  /* Contêiner da Lista em si (similar ao formContainer, mas para lista) */
-  .listContainer {
-    background: var(--color-bg-alt); /* Usa a variável global do seu :root */
-    border-radius: 18px;
-    box-shadow: 0 4px 30px 0 rgba(0, 0, 0, 0.08); /* Sombra mais suave */
-    padding: 40px 60px; /* Padding interno aumentado */
-    width: 100%; /* Ocupa toda a largura do contentWrapper */
-    border: 1px solid var(--color-border-light); /* Usa a variável global */
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Título da Página - Reutiliza estilos do global ou de cadastro */
-  .titulo {
-    text-align: center;
-    font-size: 2.5rem; /* Fonte maior */
-    color: var(--color-text); /* Usa a variável global */
-    margin-bottom: 12px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    position: relative;
-    padding-bottom: 10px;
-  }
-  
-  .decoracao {
-    width: 80px; /* Linha de decoração mais larga */
-    height: 6px; /* Linha de decoração mais grossa */
-    background: var(--color-primary); /* Usa a variável global */
-    margin: 0 auto 30px auto; /* Centraliza e adiciona margem inferior */
-    border-radius: 3px;
-  }
-  
-  /* Header com botões de ação e mensagens */
-  .actionsHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
-    gap: 15px; /* Espaçamento entre os itens */
-  }
-  
-  .addButton {
-    /* Estilo base do button já vem do global, sobrescrevendo só o que for específico */
-    background: var(--color-primary);
-    color: #fff;
-    padding: 12px 25px; /* Ajustado para um botão de adição */
-    font-size: 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    box-shadow: 0 2px 8px 0 rgba(25, 118, 210, 0.2); /* Usa rgba para consistência */
-    transition: background 0.2s ease, transform 0.2s ease;
-    flex-shrink: 0; /* Não permite que o botão encolha */
-    /* Remove outras propriedades que já estão em button global, como border e cursor */
-  }
-  
-  .addButton:hover {
-    background: var(--color-primary-dark);
-    transform: translateY(-1px);
-  }
-  
-  /* Estilos para Tabela */
-  .tableWrapper {
-    overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
-    width: 100%;
-  }
-  
-  .beneficiariosTable {
-    width: 100%;
-    border-collapse: separate; /* Permite border-spacing */
-    border-spacing: 0 10px; /* Espaço entre as linhas da tabela */
-  }
-  
-  .beneficiariosTable th,
-  .beneficiariosTable td {
-    text-align: center; 
-    padding: 15px 20px;
-    font-size: 0.95rem;
-  }
-  
-  .beneficiariosTable th {
-    background-color: var(--color-primary); /* Cabeçalho com cor primária */
-    color: #fff;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
-    position: sticky; /* Fixa o cabeçalho se a tabela rolar */
-    top: 0;
-    z-index: 1; /* Garante que fique acima do conteúdo da tabela */
-  }
-  
-  /* Borda arredondada no cabeçalho */
-  .beneficiariosTable th:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-  }
-  .beneficiariosTable th:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-  
-  
-  .beneficiariosTable tbody tr {
-    background-color: var(--color-bg-alt); /* Fundo branco para as linhas */
-    transition: background-color 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Sombra sutil para linhas */
-    border-radius: 8px; /* Arredonda as linhas */
-  }
-  
-  .beneficiariosTable tbody tr:hover {
-    background-color: #f0f4f8; /* Levemente mais escuro no hover */
-  }
-  
-  /* Estilos para as células (td) */
-  .beneficiariosTable td {
-    color: var(--color-text-light); /* Texto mais suave nas células */
-    border-top: none; /* Remove borda superior para evitar linhas duplas */
-    vertical-align: middle; /* Alinhamento vertical */
-  }
-  
-  /* Borda arredondada nas células da primeira/última coluna da linha */
-  .beneficiariosTable tbody tr td:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-  }
-  .beneficiariosTable tbody tr td:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-  
-  
-  /* Botões de Ação dentro da Tabela */
-  .actionButtons { 
-    display: flex; 
-    gap: 8px; 
-    justify-content: center; 
-    flex-wrap: wrap; 
-  }
-  
-  .editButton, .deleteButton {
-    padding: 8px 15px; /* Padding menor para botões da tabela */
-    font-size: 0.9rem;
-    font-weight: 600;
-    border-radius: 6px;
-    transition: background 0.2s ease, transform 0.2s ease;
-    box-shadow: none; /* Remove sombra para botões menores */
-    /* Propriedades como border, cursor já vêm do global button */
-  }
-  
-  .editButton {
-    background: var(--color-primary); /* Azul da paleta principal */
-    color: #fff;
-  }
-  .editButton:hover:not(:disabled) {
-    background: var(--color-primary-dark);
-    transform: translateY(-1px);
-  }
-  
-  .deleteButton {
-    background: var(--color-error); /* Vermelho para excluir */
-    color: #fff;
-  }
-  .deleteButton:hover:not(:disabled) {
-    background: var(--color-error); /* Ajuste se quiser um tom mais escuro de vermelho no hover */
-    filter: brightness(0.9); /* Escurece um pouco */
-    transform: translateY(-1px);
-  }
-  
-  .editButton:disabled, .deleteButton:disabled, .addButton:disabled {
-    background: #cccccc;
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-  
-  /* Mensagens de estado */
-  .loadingMessage, .errorMessage, .noDataMessage {
-    text-align: center;
-    padding: 20px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text-light);
-    background-color: var(--color-bg-alt);
-    border-radius: 8px;
-    margin-top: 20px; /* Para separar do header de ações */
-    border: 1px solid var(--color-border-light);
-    width: 100%; /* Ocupa a largura total */
-  }
-  .errorMessage {
-    color: var(--color-error);
-    background-color: rgba(192, 57, 43, 0.1); /* Usando a cor error com transparência */
-    border-color: var(--color-error);
-  }
-  .loadingMessage {
-    color: var(--color-primary);
-    background-color: rgba(25, 118, 210, 0.05);
-    border-color: rgba(25, 118, 210, 0.2);
-  }
-  .noDataMessage {
-    /* Estilo padrão já deve ser bom, mas pode personalizar */
-    border-color: var(--color-border);
-  }
-  
-  /* Responsividade para telas menores */
-  @media (max-width: 768px) {
-    .listContainer {
-      padding: 20px; /* Reduz padding em telas menores */
-    }
-    .titulo {
-      font-size: 2rem;
-    }
-    .actionsHeader {
-      flex-direction: column; /* Empilha o botão de adicionar e mensagens */
-      align-items: stretch;
-      gap: 10px;
-    }
-    .addButton {
-      width: 100%; /* Botão de adicionar ocupa a largura total */
-    }
-  
-    /* Transformação da tabela para "cartões" em telas pequenas */
-    .beneficiariosTable {
-      border-spacing: 0; /* Remove espaçamento entre linhas quando vira cartão */
-    }
-    .beneficiariosTable thead {
-      display: none; /* Esconde o cabeçalho da tabela */
-    }
-    .beneficiariosTable, .beneficiariosTable tbody, .beneficiariosTable tr, .beneficiariosTable td {
-      display: block; /* Faz com que todos sejam blocos para empilhar */
-      width: 100%;
-    }
-    .beneficiariosTable tr {
-      margin-bottom: 15px; /* Espaço entre os "cartões" de cada beneficiário */
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      padding: 15px; /* Padding interno para cada "cartão" */
-      background-color: var(--color-bg-alt); /* Garante fundo branco para o cartão */
-    }
-    .beneficiariosTable td {
-      text-align: right; /* Alinha o valor à direita */
-      padding: 8px 10px;
-      border: none; /* Remove bordas internas */
-      position: relative;
-      padding-left: 50%; /* Espaço para o label falso */
-      min-height: 35px; /* Altura mínima para cada campo */
-      display: flex; /* Para alinhar label e valor */
-      align-items: center;
-      justify-content: flex-end;
-    }
-    .beneficiariosTable td::before {
-      content: attr(data-label); /* Usa o atributo data-label como "cabeçalho" */
-      position: absolute;
-      left: 10px;
-      width: calc(50% - 20px);
-      text-align: left;
-      font-weight: 700;
-      color: var(--color-text);
-    }
-    /* Estilos específicos para os labels simulados */
-    .beneficiariosTable td:nth-of-type(1)::before { content: "Nome:"; }
-    .beneficiariosTable td:nth-of-type(2)::before { content: "Email:"; }
-    .beneficiariosTable td:nth-of-type(3)::before { content: "Telefone:"; }
-    /* .beneficiariosTable td:nth-of-type(4)::before { content: "CPF:"; } */ /* Descomente se mostrar CPF */
-    .beneficiariosTable td:nth-of-type(4)::before { content: "NIF:"; } /* Ajuste a ordem se mostrar CPF */
-    .beneficiariosTable td:nth-of-type(5)::before { content: "Ações:"; } /* Ajuste a ordem se mostrar CPF */
-  
-    .actionButtons {
-      justify-content: flex-end; /* Alinha botões à direita no "cartão" */
-      margin-top: 10px; /* Espaço após os dados */
-      width: 100%; /* Ocupa largura total na célula do cartão */
-    }
-    .editButton, .deleteButton {
-      flex-grow: 1; /* Faz os botões crescerem para preencher o espaço */
-      padding: 10px 15px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .listContainer {
-      padding: 15px;
-    }
-    .titulo {
-      font-size: 1.8rem;
-    }
-  }
-
-.modalOverlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: 1000;
+  min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  background: var(--color-bg); 
 }
-.modalContent {
+
+/* 2. ENVOLTÓRIO DO CONTEÚDO (Cria a margem de segurança do Menu) */
+.contentWrapper {
+  flex-grow: 1;
+  width: 100%;
+  /* O padding-left de 260px atua como um escudo, impedindo a tabela de encostar no menu lateral */
+  padding: 40px 30px 40px 260px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza a tabela APENAS no espaço livre à direita */
+}
+
+/* 3. O FUNDO BRANCO DA LISTA */
+.listContainer {
   background: var(--color-bg-alt);
   border-radius: 18px;
-  box-shadow: 0 8px 32px 0 rgba(25, 118, 210, 0.18);
-  padding: 6px 18px 6px 18px;
-  max-width: 700px;
-  width: 96vw;
-  border: 1.5px solid var(--color-border-light);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  padding: 40px;
+  width: 100%;
+  max-width: 1100px;
+  min-width: 0; /* A MÁGICA: Permite que o quadro encolha no zoom e ative a barra de rolagem da tabela */
+  border: 1px solid var(--color-border-light);
   display: flex;
   flex-direction: column;
-  position: relative;
 }
 
-.modalContent form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 18px;
-  align-items: start;
-  justify-items: stretch;
+/* ========================================= */
+/* ELEMENTOS INTERNOS E CABEÇALHO            */
+/* ========================================= */
+
+.titulo {
+  text-align: center;
+  font-size: 2.2rem;
+  color: var(--color-text);
+  margin-bottom: 12px;
+  font-weight: 800;
+}
+
+.decoracao {
+  width: 80px;
+  height: 5px;
+  background: var(--color-primary);
+  margin: 0 auto 30px auto;
+  border-radius: 3px;
+}
+
+.actionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  gap: 15px;
+  flex-wrap: wrap;
   width: 100%;
 }
+
+.addButton {
+  background: var(--color-primary);
+  color: #fff;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+.addButton:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.formInput {
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text);
+  border-radius: 8px;
+  outline: none;
+  padding: 10px;
+}
+
+.formInput:focus {
+  border-color: var(--color-primary);
+}
+
+/* ========================================= */
+/* TABELA COM ROLAGEM INTELIGENTE (ZOOM)     */
+/* ========================================= */
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto; /* Barrinha de rolagem ativada no zoom */
+  padding-bottom: 10px;
+}
+
+.beneficiariosTable {
+  width: 100%;
+  min-width: 900px; /* Limite para a barra de rolagem aparecer */
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.beneficiariosTable th,
+.beneficiariosTable td {
+  text-align: center; 
+  padding: 15px 20px;
+  font-size: 0.95rem;
+  white-space: nowrap; /* Mantém o texto em uma linha para o scroll funcionar suave */
+}
+
+.beneficiariosTable th {
+  background-color: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.beneficiariosTable th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+.beneficiariosTable th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+.beneficiariosTable tbody tr {
+  background-color: var(--color-bg-alt);
+  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
+
+.beneficiariosTable tbody tr:hover { background-color: #f0f4f8; }
+.beneficiariosTable td { color: var(--color-text); border-top: none; vertical-align: middle; }
+.beneficiariosTable tbody tr td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+.beneficiariosTable tbody tr td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+/* Botões de Ação da Tabela */
+.actionButtons { 
+  display: flex; 
+  gap: 8px; 
+  justify-content: center; 
+  flex-wrap: nowrap; /* Impede os botões de empilharem */
+}
+
+.editButton, .deleteButton { 
+  padding: 8px 15px; 
+  font-size: 0.9rem; 
+  font-weight: 600; 
+  border-radius: 6px; 
+  transition: background 0.2s ease, transform 0.2s ease; 
+  border: none; 
+  cursor: pointer; 
+}
+
+.editButton { background: var(--color-primary); color: #fff; }
+.editButton:hover:not(:disabled) { background: var(--color-primary-dark); transform: translateY(-1px); }
+.deleteButton { background: var(--color-error); color: #fff; }
+.deleteButton:hover:not(:disabled) { filter: brightness(0.9); transform: translateY(-1px); }
+
+/* Mensagens */
+.loadingMessage, .errorMessage, .noDataMessage { 
+  text-align: center; 
+  padding: 20px; 
+  font-size: 1.1rem; 
+  font-weight: 600; 
+  border-radius: 8px; 
+  margin-top: 20px; 
+  width: 100%; 
+}
+.errorMessage { color: var(--color-error); background-color: rgba(192, 57, 43, 0.1); }
+
+/* ========================================= */
+/* MODAL DE EDIÇÃO                           */
+/* ========================================= */
+
+.modalOverlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35); z-index: 9999; display: flex; align-items: center; justify-content: center;
+}
+.modalContent {
+  background: var(--color-bg-alt); border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(25, 118, 210, 0.18);
+  padding: 32px; max-width: 700px; width: 96vw; border: 1.5px solid var(--color-border-light);
+  display: flex; flex-direction: column; position: relative; max-height: 90vh; overflow-y: auto;
+}
+.modalContent form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; align-items: start; width: 100%; }
+.modalContent .formGroup, .modalContent .formGroupFullWidth { width: 100%; display: flex; flex-direction: column; align-items: flex-start; }
+.modalContent .formGroupFullWidth { grid-column: 1 / -1; }
+.modalContent input { width: 100%; margin-bottom: 4px; font-size: 0.98rem; padding: 10px; border: 1px solid var(--color-border-light); border-radius: 6px; color: var(--color-text); }
+.modalContent label { font-size: 0.98rem; color: var(--color-text); }
+.modalContent .modalButtonGroup { display: flex; gap: 18px; justify-content: center; width: 100%; margin-top: 24px; }
+
+/* ========================================= */
+/* RESPONSIVIDADE                            */
+/* ========================================= */
 @media (max-width: 900px) {
-  .modalContent {
-    padding: 18px 2vw;
-    max-width: 99vw;
-  }
-  .modalContent form {
-    grid-template-columns: 1fr;
-    gap: 14px 0;
-  }
-}
-.modalContent .formGroup,
-.modalContent .formGroupFullWidth {
-  width: 100%;
-  max-width: 320px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  grid-column: auto;
-}
-.modalContent .formGroupFullWidth {
-  grid-column: 1 / -1;
-}
-.modalContent label {
-  font-size: 0.98rem;
-}
-.modalContent input {
-  width: 100%;
-  max-width: 320px;
-  margin-bottom: 4px;
-  font-size: 0.98rem;
-  padding: 8px 10px;
-}
-.modalContent .separador {
-  width: 100%;
-}
-.modalContent button[type="submit"],
-.modalContent button[type="button"] {
-  width: 60%;
-  min-width: 180px;
-  max-width: 300px;
-  margin: 12px auto 0 auto;
-  display: block;
-  font-size: 1.1rem;
+  .contentWrapper { padding: 40px 20px; }
+  .modalContent { padding: 20px; }
+  .modalContent form { grid-template-columns: 1fr; gap: 10px 0; }
+  .modalContent .modalButtonGroup { flex-direction: column; }
+  .modalContent .modalButtonGroup button { width: 100%; }
 }
 
-.modalContent .modalButtonGroup button {
-  width: 180px;
-  min-width: 180px;
-  max-width: 180px;
-  height: 44px;
-  font-size: 1.08rem;
-  margin: 0;
+@media (max-width: 768px) {
+  .listContainer { padding: 20px; }
+  .actionsHeader { flex-direction: column; align-items: stretch; }
+  .addButton { width: 100%; }
+  
+  /* Conversão da tabela para Mobile */
+  .beneficiariosTable thead { display: none; }
+  .beneficiariosTable, .beneficiariosTable tbody, .beneficiariosTable tr, .beneficiariosTable td { display: block; width: 100%; }
+  .beneficiariosTable tr { margin-bottom: 15px; border: 1px solid var(--color-border-light); padding: 15px; }
+  .beneficiariosTable td { 
+    text-align: right; 
+    padding-left: 50%; 
+    position: relative; 
+    border: none; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    min-height: 30px; 
+    white-space: normal; /* No mobile, permite o texto quebrar de linha se for muito longo */
+  }
+  .actionButtons { justify-content: flex-end; margin-top: 10px; width: 100%; }
 }

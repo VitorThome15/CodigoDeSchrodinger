@@ -92,7 +92,6 @@ export default function ListaDoadores() {
     const cpfLimpo = (editForm.cpf || "").replace(/\D/g, "");
     
     try {
-      // 1. ENVIO DO ENDEREÇO + VALIDAÇÃO DE SUCESSO
       if (editForm.addressId) {
         const resAddress = await fetch(`${BASE_URL}/addresses/${editForm.addressId}`, {
           method: "PUT", 
@@ -112,7 +111,6 @@ export default function ListaDoadores() {
         }
       }
       
-      // 2. ENVIO DOS DADOS PESSOAIS + VALIDAÇÃO DE SUCESSO
       if (editForm.personId) {
         const resPerson = await fetch(`${BASE_URL}/people/${editForm.personId}`, {
           method: "PUT", 
@@ -132,7 +130,6 @@ export default function ListaDoadores() {
         }
       }
       
-      // 3. SE AMBOS SALVARAM NO BANCO, ATUALIZA A TABELA LOCAL PRESERVANDO A ESTRUTURA
       setDoadores(doadores.map(d => 
         d.id === editForm.id 
           ? { 

@@ -205,8 +205,6 @@ export default function ListaBeneficiarios() {
                 </tr>
               </thead>
               
-              {/* MÁGICA AQUI: Isolar os estados em <tbody> diferentes blinda o React contra extensões do navegador */}
-              
               {loading && (
                 <tbody>
                   <tr><td colSpan={6} className={styles.loadingMessage}>Carregando...</td></tr>
@@ -228,7 +226,6 @@ export default function ListaBeneficiarios() {
               {!loading && !error && beneficiariosProcessados.length > 0 && (
                 <tbody>
                   {beneficiariosProcessados.map((b, index) => (
-                    /* Adicionado o || index como camada extra de segurança caso o banco devolva um ID vazio */
                     <tr key={b.id || index}>
                       <td style={{ textTransform: "capitalize" }}>{b.person?.name}</td>
                       <td>{b.person?.email}</td>
