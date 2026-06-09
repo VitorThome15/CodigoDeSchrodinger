@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -57,14 +58,16 @@ public class ReceiverService {
     }
 
     public List<ReceiverResponseDto> getAll() {
-        logger.debug("Service: Fetching all receivers");
-        List<Receiver> receivers = this.receiverRepository.findAll();
-        logger.debug("Found {} receivers in database", receivers.size());
+        logger.debug("Service: Fetching all active receivers");
+        // Modificado para trazer apenas os ativos
+        List<Receiver> receivers = this.receiverRepository.findByIsActiveTrue();
+        logger.debug("Found {} active receivers in database", receivers.size());
         return receivers.stream()
                 .map(this.receiverMapper::toResponse)
                 .toList();
     }
 
+    @Transactional
     public ReceiverResponseDto create(ReceiverRequestDto receiverRequestDto) {
         logger.debug("Service: Creating new receiver with NIF: {}", receiverRequestDto.getNif());
 
@@ -76,11 +79,15 @@ public class ReceiverService {
         Receiver receiver = this.receiverMapper.toEntity(
                 receiverRequestDto, this.personService.findById(receiverRequestDto.getPersonId())
         );
+        // Garante que o recebedor nasce ativo
+        receiver.setIsActive(true);
+        
         Receiver savedReceiver = this.receiverRepository.saveAndFlush(receiver);
         logger.debug("Receiver created with ID: {}", savedReceiver.getId());
         return this.receiverMapper.toResponse(savedReceiver);
     }
 
+    @Transactional
     public ReceiverResponseDto update(UUID id, ReceiverRequestDto receiverRequestDto) {
         logger.debug("Service: Updating receiver with ID: {}", id);
         Receiver receiver = findById(id);
@@ -96,6 +103,7 @@ public class ReceiverService {
         return this.receiverMapper.toResponse(updatedReceiver);
     }
 
+    @Transactional
     public ReceiverResponseDto patch(UUID id, ReceiverRequestPatchDto receiverRequestPatchDto) {
         logger.debug("Service: Partially updating receiver with ID: {}", id);
         Receiver receiver = findById(id);
@@ -113,4 +121,18 @@ public class ReceiverService {
         return this.receiverMapper.toResponse(updatedReceiver);
     }
 
+    // AQUI: Criado o método de deleção lógica que não existia!
+    @Transactional
+    public void delete(UUID id) {
+        logger.info("Aplicando Soft Delete no receiver ID: {}", id);
+        Receiver receiver = this.findById(id);
+        try {
+            receiver.setIsActive(false); 
+            this.receiverRepository.save(receiver);
+            logger.info("Receiver desativado com sucesso!");
+        } catch (Exception e) {
+            logger.error("Erro ao tentar desativar o receiver {}: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Erro ao desativar o receiver.");
+        }
+    }
 }

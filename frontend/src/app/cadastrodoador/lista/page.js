@@ -7,104 +7,197 @@ import { useRouter } from "next/navigation";
 import modalStyles from "./lista.module.css";
 
 const API_URL = "http://localhost:8080/api/givers";
+const BASE_URL = "http://localhost:8080/api";
 
 export default function ListaDoadores() {
-  const [doadores, setDoadores] = useState([]); // [{id, nomeCompleto, email, telefoneCelular, ...}]
+  const [doadores, setDoadores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
+  const [buscaNome, setBuscaNome] = useState("");
+  const [ordemNome, setOrdemNome] = useState("asc");
+  
   const router = useRouter();
+  
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editForm, setEditForm] = useState(null); // objeto do doador a editar
+  const [editForm, setEditForm] = useState(null);
   const [editError, setEditError] = useState("");
   const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    setError("");
     fetch(API_URL)
       .then((res) => {
-        if (!res.ok) throw new Error("Erro na rede");
+        if (!res.ok) throw new Error("Erro ao buscar dados do servidor.");
         return res.json();
       })
       .then((data) => setDoadores(Array.isArray(data) ? data : []))
-      .catch((err) => setError("Erro ao carregar doadores do backend"))
+      .catch((err) => setError("Erro ao carregar doadores"))
       .finally(() => setLoading(false));
   }, []);
 
-  const handleEdit = (id) => {
-    router.push(`/cadastrodoador/editar/${id}`);
-  };
+  const doadoresProcessados = doadores
+    .filter((d) => d.person?.name?.toLowerCase().includes(buscaNome.toLowerCase()))
+    .sort((a, b) => {
+      const nomeA = a.person?.name || "";
+      const nomeB = b.person?.name || "";
+      return ordemNome === "asc" ? nomeA.localeCompare(nomeB) : nomeB.localeCompare(nomeA);
+    });
 
   const handleDelete = async (id) => {
     if (!window.confirm("Tem certeza que deseja excluir este doador?")) return;
     setLoading(true);
-    setError("");
     try {
       const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Erro ao excluir");
-      
+      if (!res.ok) throw new Error("Erro ao deletar.");
       setDoadores(doadores.filter((d) => d.id !== id));
-      alert("Doador excluído com sucesso!");
-    } catch (err) {
-      setError("Erro ao excluir doador");
-    } finally {
-      setLoading(false);
-    }
+      alert("Doador removido com sucesso!");
+    } catch (err) { setError("Erro ao remover doador"); } finally { setLoading(false); }
   };
 
   const openEditModal = (doador) => {
-    setEditForm({ ...doador });
+    console.log("Dados do doador selecionado:", doador);
+    
+    setEditForm({
+      id: doador.id ?? "", 
+      personId: doador.person?.id ?? "", 
+      addressId: doador.person?.address?.id ?? "",
+      nomeCompleto: doador.person?.name ?? "", 
+      email: doador.person?.email ?? "",
+      telefoneCelular: doador.person?.phone ?? "", 
+      cpf: doador.person?.cpf ?? "",
+      endereco: doador.person?.address?.street ?? "", 
+      numero: doador.person?.address?.number ?? "",
+      complemento: doador.person?.address?.complement ?? "", 
+      bairro: doador.person?.address?.neighborhood ?? "",
+      pontoReferencia: doador.person?.address?.referencePoint ?? "",
+    });
+    setEditError("");
     setEditModalOpen(true);
-    setEditError("");
   };
-  const closeEditModal = () => {
-    setEditModalOpen(false);
-    setEditForm(null);
-    setEditError("");
+
+  const closeEditModal = () => { 
+    setEditModalOpen(false); 
+    setEditForm(null); 
+    setEditError(""); 
   };
-  const handleEditChange = (e) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-  const handleEditSubmit = (e) => {
+  
+  const handleEditChange = (e) => setEditForm({ ...editForm, [e.target.name]: e.target.value });
+
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     setEditLoading(true);
     setEditError("");
-    // Validação de CPF (opcional, mas se preenchido deve ter 11 dígitos)
-    const cpfLimpo = editForm.cpf.replace(/\D/g, "");
-    if (cpfLimpo.length > 0 && cpfLimpo.length !== 11) {
-      setEditError("CPF deve conter 11 dígitos numéricos.");
-      setEditLoading(false);
-      return;
-    }
+    
+    const cpfLimpo = (editForm.cpf || "").replace(/\D/g, "");
+    
     try {
-      const novos = doadores.map((d) => d.id === editForm.id ? { ...editForm, cpf: cpfLimpo } : d);
-      setDoadores(novos);
-      localStorage.setItem('mockDoadores', JSON.stringify(novos));
-      setEditModalOpen(false);
-      setEditForm(null);
-    } catch (err) {
-      setEditError("Erro ao salvar edição");
-    } finally {
-      setEditLoading(false);
+      // 1. ENVIO DO ENDEREÇO + VALIDAÇÃO DE SUCESSO
+      if (editForm.addressId) {
+        const resAddress = await fetch(`${BASE_URL}/addresses/${editForm.addressId}`, {
+          method: "PUT", 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            street: editForm.endereco, 
+            neighborhood: editForm.bairro, 
+            number: Number(editForm.numero), 
+            complement: editForm.complemento, 
+            referencePoint: editForm.pontoReferencia 
+          })
+        });
+        
+        if (!resAddress.ok) {
+          const txtErro = await resAddress.text();
+          throw new Error(`O servidor recusou a atualização do Endereço (Status ${resAddress.status}): ${txtErro}`);
+        }
+      }
+      
+      // 2. ENVIO DOS DADOS PESSOAIS + VALIDAÇÃO DE SUCESSO
+      if (editForm.personId) {
+        const resPerson = await fetch(`${BASE_URL}/people/${editForm.personId}`, {
+          method: "PUT", 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            name: editForm.nomeCompleto, 
+            phone: editForm.telefoneCelular, 
+            email: editForm.email, 
+            cpf: cpfLimpo, 
+            idAddress: editForm.addressId 
+          })
+        });
+        
+        if (!resPerson.ok) {
+          const txtErro = await resPerson.text();
+          throw new Error(`O servidor recusou os dados da Pessoa (Status ${resPerson.status}): ${txtErro}`);
+        }
+      }
+      
+      // 3. SE AMBOS SALVARAM NO BANCO, ATUALIZA A TABELA LOCAL PRESERVANDO A ESTRUTURA
+      setDoadores(doadores.map(d => 
+        d.id === editForm.id 
+          ? { 
+              ...d, 
+              person: { 
+                ...d.person, 
+                name: editForm.nomeCompleto, 
+                email: editForm.email, 
+                phone: editForm.telefoneCelular, 
+                cpf: cpfLimpo, 
+                address: { 
+                  ...d.person?.address, 
+                  street: editForm.endereco, 
+                  neighborhood: editForm.bairro,
+                  number: Number(editForm.numero),
+                  complement: editForm.complemento,
+                  referencePoint: editForm.pontoReferencia
+                } 
+              } 
+            } 
+          : d
+      ));
+      
+      closeEditModal();
+      alert("Doador atualizado com sucesso!");
+    } catch (err) { 
+      console.error("Erro detalhado no salvamento:", err);
+      setEditError(err.message); 
+      alert("Falha ao salvar alterações:\n" + err.message);
+    } finally { 
+      setEditLoading(false); 
     }
   };
 
   return (
     <div className={styles.containerGeral}>
-      <MenuBar />
-      <Navigation />
+      <MenuBar /><Navigation />
       <div className={styles.contentWrapper}>
         <div className={styles.listContainer}>
           <h1 className={styles.titulo}>Doadores Cadastrados</h1>
           <div className={styles.decoracao}></div>
+          
           <div className={styles.actionsHeader}>
-            <button
-              className={styles.addButton}
-              onClick={() => router.push("/cadastrodoador")}
-            >
-              + Adicionar Doador
-            </button>
+            <button className={styles.addButton} onClick={() => router.push("/cadastrodoador")}>+ Adicionar Doador</button>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <input type="text" className={styles.formInput} placeholder="Buscar..." value={buscaNome} onChange={(e) => setBuscaNome(e.target.value)} style={{ width: '250px', padding: '10px' }} />
+              
+              <button 
+                onClick={() => setOrdemNome(ordemNome === "asc" ? "desc" : "asc")} 
+                style={{ 
+                  padding: '10px 16px', 
+                  borderRadius: '8px', 
+                  border: 'none', 
+                  background: 'var(--color-primary, #1976d2)', 
+                  color: '#fff', 
+                  cursor: 'pointer', 
+                  fontWeight: '600',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Ordem: {ordemNome === "asc" ? "A - Z ↓" : "Z - A ↑"}
+              </button>
+            </div>
           </div>
+
           <div className={styles.tableWrapper}>
             <table className={styles.beneficiariosTable}>
               <thead>
@@ -112,45 +205,29 @@ export default function ListaDoadores() {
                   <th>Nome</th>
                   <th>Email</th>
                   <th>Telefone</th>
-                  <th>NIF</th>
+                  <th>CPF</th>
+                  <th>Bairro</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr>
-                    <td colSpan={5} className={styles.loadingMessage}>Carregando...</td>
-                  </tr>
+                  <tr key="loading-row"><td colSpan={6} className={styles.loadingMessage}>Carregando...</td></tr>
                 ) : error ? (
-                  <tr>
-                    <td colSpan={5} className={styles.errorMessage}>{error}</td>
-                  </tr>
-                ) : doadores.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className={styles.noDataMessage}>Nenhum doador cadastrado ainda.</td>
-                  </tr>
+                  <tr key="error-row"><td colSpan={6} className={styles.errorMessage}>{error}</td></tr>
+                ) : doadoresProcessados.length === 0 ? (
+                  <tr key="empty-row"><td colSpan={6} className={styles.noDataMessage}>Nenhum doador encontrado.</td></tr>
                 ) : (
-                  doadores.map((d) => (
+                  doadoresProcessados.map((d) => (
                     <tr key={d.id}>
-                      <td>{d.person?.name || "Sem nome"}</td>
-                      <td>{d.person?.email || "Sem e-mail"}</td>
-                      <td>{d.person?.phone || "Sem telefone"}</td>
+                      <td style={{ textTransform: "capitalize" }}>{d.person?.name}</td>
+                      <td>{d.person?.email}</td>
+                      <td>{d.person?.phone}</td>
                       <td>{d.person?.cpf || "–"}</td>
+                      <td style={{ textTransform: "capitalize" }}>{d.person?.address?.neighborhood || "–"}</td>
                       <td className={styles.actionButtons}>
-                        <button
-                          className={styles.editButton}
-                          onClick={() => openEditModal(d)}
-                          disabled={loading}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className={styles.deleteButton}
-                          onClick={() => handleDelete(d.id)}
-                          disabled={loading}
-                        >
-                          Excluir
-                        </button>
+                        <button className={styles.editButton} onClick={() => openEditModal(d)}>Editar</button>
+                        <button className={styles.deleteButton} onClick={() => handleDelete(d.id)}>Excluir</button>
                       </td>
                     </tr>
                   ))
@@ -160,7 +237,7 @@ export default function ListaDoadores() {
           </div>
         </div>
       </div>
-      {/* Modal de edição */}
+
       {editModalOpen && (
         <div className={modalStyles.modalOverlay}>
           <div className={modalStyles.modalContent}>
@@ -168,50 +245,53 @@ export default function ListaDoadores() {
             <form onSubmit={handleEditSubmit} className={modalStyles.formulario}>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_nomeCompleto"><b>Nome completo*</b></label>
-                <input id="edit_nomeCompleto" name="nomeCompleto" value={editForm.nomeCompleto} onChange={handleEditChange} required placeholder="Fulano da Silva" />
+                <input id="edit_nomeCompleto" name="nomeCompleto" value={editForm.nomeCompleto} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_email"><b>E-mail*</b></label>
-                <input id="edit_email" name="email" type="email" value={editForm.email} onChange={handleEditChange} required placeholder="fulano@gmail.com" />
+                <input id="edit_email" name="email" type="email" value={editForm.email} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_telefoneCelular"><b>Telefone*</b></label>
-                <input id="edit_telefoneCelular" name="telefoneCelular" value={editForm.telefoneCelular} onChange={handleEditChange} required placeholder="(45) 9 9988-7766" type="tel" />
+                <input id="edit_telefoneCelular" name="telefoneCelular" value={editForm.telefoneCelular} onChange={handleEditChange} required type="tel" />
               </div>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_cpf"><b>CPF*</b></label>
-                <input id="edit_cpf" name="cpf" type="text" pattern="[0-9]*" maxLength={11} value={editForm.cpf} onChange={e => { const onlyNums = e.target.value.replace(/\D/g, ""); setEditForm({ ...editForm, cpf: onlyNums }); }} placeholder="11122233355" required />
+                <input id="edit_cpf" name="cpf" value={editForm.cpf} onChange={handleEditChange} required />
               </div>
-              <hr className={modalStyles.separador} />
               <div className={modalStyles.formGroupFullWidth}>
                 <label htmlFor="edit_endereco"><b>Endereço*</b></label>
-                <input id="edit_endereco" name="endereco" value={editForm.endereco} onChange={handleEditChange} required placeholder="Rua da Água" />
+                <input id="edit_endereco" name="endereco" value={editForm.endereco} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_numero"><b>Número*</b></label>
-                <input id="edit_numero" name="numero" type="number" value={editForm.numero} onChange={handleEditChange} required placeholder="2015" />
+                <input id="edit_numero" name="numero" type="number" value={editForm.numero} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_complemento"><b>Complemento</b></label>
-                <input id="edit_complemento" name="complemento" value={editForm.complemento} onChange={handleEditChange} placeholder="Ap 307" />
+                <input id="edit_complemento" name="complemento" value={editForm.complemento} onChange={handleEditChange} />
               </div>
               <div className={modalStyles.formGroupFullWidth}>
                 <label htmlFor="edit_bairro"><b>Bairro*</b></label>
-                <input id="edit_bairro" name="bairro" value={editForm.bairro} onChange={handleEditChange} required placeholder="Centro" />
+                <input id="edit_bairro" name="bairro" value={editForm.bairro} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroupFullWidth}>
                 <label htmlFor="edit_pontoReferencia"><b>Ponto de referência</b></label>
-                <input id="edit_pontoReferencia" name="pontoReferencia" value={editForm.pontoReferencia} onChange={handleEditChange} placeholder="Em frente ao parque" />
+                <input id="edit_pontoReferencia" name="pontoReferencia" value={editForm.pontoReferencia} onChange={handleEditChange} />
               </div>
-              <div className={modalStyles.modalButtonGroup}>
-                <button type="button" onClick={closeEditModal} style={{ background: '#aaa', color: '#fff' }}>Cancelar</button>
-                <button type="submit" disabled={editLoading}>{editLoading ? "Salvando..." : "Salvar Alterações"}</button>
+              <div className={modalStyles.modalButtonGroup} style={{ justifyContent: 'center', gridColumn: '1 / -1' }}>
+                <button type="button" onClick={closeEditModal} style={{ background: '#aaa', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer' }}>
+                  Cancelar
+                </button>
+                <button type="submit" disabled={editLoading} style={{ background: '#18132b', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer' }}>
+                  {editLoading ? "Salvando..." : "Salvar Alterações"}
+                </button>
               </div>
-              {editError && <div className={modalStyles.errorMessage}>{editError}</div>}
+              {editError && <div className={modalStyles.errorMessage} style={{ gridColumn: "1 / -1", marginTop: "10px" }}>{editError}</div>}
             </form>
           </div>
         </div>
       )}
     </div>
   );
-} 
+}

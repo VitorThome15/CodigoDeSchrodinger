@@ -4,7 +4,6 @@ import com.oficina_dev.backend.dtos.Giver.GiverRequestDto;
 import com.oficina_dev.backend.dtos.Giver.GiverResponseDto;
 import com.oficina_dev.backend.mappers.GiverMapper;
 import com.oficina_dev.backend.models.Giver.Giver;
-import com.oficina_dev.backend.models.Person.Person;
 import com.oficina_dev.backend.repositories.GiverRepository;
 import com.oficina_dev.backend.repositories.PersonRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -49,11 +48,9 @@ public class GiverService {
     }
 
     public List<GiverResponseDto> getAll() {
-        logger.debug("Service: Fetching all givers");
-        List<Giver> givers = this.giverRepository.findAll();
-        logger.debug("Found {} givers in database", givers.size());
+        List<Giver> givers = this.giverRepository.findByIsActiveTrue();
         return givers.stream()
-                .map(this.giverMapper::toResponse)
+                .map(giver -> this.giverMapper.toResponse(giver))
                 .toList();
     }
 
@@ -67,22 +64,17 @@ public class GiverService {
 
     @Transactional
     public void delete(UUID id) {
-        logger.info("Iniciando exclusão do doador fictício: {}", id);
+        logger.info("Iniciando desativação (Soft Delete) do doador com ID: {}", id);
         
-        Giver giver = this.giverRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Doador não encontrado"));
+        Giver giver = this.findById(id);
 
-        UUID personId = giver.getPerson().getId();
-
-        // 1. O Pulo do Gato: Cortamos a ligação na memória para o Hibernate não surtar
-        giver.setPerson(null);
-
-        // 2. Agora podemos apagar o doador em paz
-        this.giverRepository.deleteById(id);
-
-        // 3. E por fim, apagamos a pessoa (o que vai apagar o endereço junto)
-        this.personRepository.deleteById(personId);
-        
-        logger.info("Doador e Pessoa excluídos com sucesso sem conflitos!");
+        try {
+            giver.setIsActive(false); 
+            this.giverRepository.save(giver);
+            logger.info("Doador desativado com sucesso!");
+        } catch (Exception e) {
+            logger.error("Erro ao tentar desativar o doador {}: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Erro ao desativar o doador.");
+        }
     }
 }

@@ -80,4 +80,5 @@ public class AuthService {
             throw new RuntimeException("Erro ao realizar login");
         }
     }
+    
 }

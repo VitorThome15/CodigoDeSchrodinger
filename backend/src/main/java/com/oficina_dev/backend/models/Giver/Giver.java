@@ -1,6 +1,5 @@
 package com.oficina_dev.backend.models.Giver;
 
-
 import com.oficina_dev.backend.models.Donation.Donation;
 import com.oficina_dev.backend.models.Person.Person;
 import jakarta.persistence.*;
@@ -41,8 +40,12 @@ public class Giver {
     @OneToMany(mappedBy = "giver", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Donation> donations;
 
+    // AQUI ESTÁ A MÁGICA: A nova variável para o Soft Delete!
+    @Setter
+    @Column(name = "is_active")
+    private Boolean isActive = true; // Por padrão, o doador já nasce "ativo" (true)
+
     public Giver(Person person) {
         this.person = person;
     }
 }
-
