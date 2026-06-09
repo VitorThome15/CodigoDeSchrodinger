@@ -49,7 +49,6 @@ const CadastroBeneficiario = () => {
     }
 
     try {
-      // 1. Cria o endereço
       const addressRes = await fetch(`${BASE_URL}/addresses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,7 +63,6 @@ const CadastroBeneficiario = () => {
       if (!addressRes.ok) throw new Error("Erro ao cadastrar endereço.");
       const address = await addressRes.json();
 
-      // 2. Cria a pessoa
       const personRes = await fetch(`${BASE_URL}/people`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,24 +70,27 @@ const CadastroBeneficiario = () => {
           name: form.nomeCompleto,
           phone: form.telefoneCelular,
           email: form.email,
-          cpf: cpfLimpo || nifLimpo,
+          cpf: cpfLimpo || nifLimpo, 
           idAddress: address.id,
         }),
       });
       if (!personRes.ok) throw new Error("Erro ao cadastrar pessoa.");
       const person = await personRes.json();
 
-      // 3. Cria o beneficiário
       const receiverRes = await fetch(`${BASE_URL}/receivers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           personId: person.id,
           isFit: true,
-          nif: nifLimpo || null,
+          nif: nifLimpo || cpfLimpo, 
         }),
       });
-      if (!receiverRes.ok) throw new Error("Erro ao cadastrar beneficiário.");
+      
+      if (!receiverRes.ok) {
+         const txtErro = await receiverRes.text();
+         throw new Error(`Erro ao cadastrar beneficiário: ${txtErro}`);
+      }
 
       router.push("/sucesso?tipo=beneficiarios");
     } catch (err) {
@@ -153,10 +154,24 @@ const CadastroBeneficiario = () => {
               <label htmlFor="pontoReferencia"><b>Ponto de referência</b></label>
               <input id="pontoReferencia" name="pontoReferencia" value={form.pontoReferencia} onChange={handleChange} placeholder="Em frente ao parque" />
             </div>
-            <button type="submit" disabled={loading}>
-              {loading ? "Cadastrando..." : "Cadastrar Beneficiário"}
-            </button>
-            {error && <div className={styles.errorMessage}>{error}</div>}
+            
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', width: '100%', marginTop: '20px' }}>
+              <button 
+                type="button" 
+                onClick={() => router.push('/cadastrobeneficiario/lista')} 
+                style={{ background: '#aaa', color: '#fff', border: 'none', padding: '14px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', width: '100%', maxWidth: '250px' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="submit" 
+                disabled={loading} 
+                style={{ background: 'var(--color-primary, #18132b)', color: '#fff', border: 'none', padding: '14px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', width: '100%', maxWidth: '250px' }}
+              >
+                {loading ? "Cadastrando..." : "Cadastrar Beneficiário"}
+              </button>
+            </div>
+            {error && <div className={styles.errorMessage} style={{ marginTop: '15px', textAlign: 'center' }}>{error}</div>}
           </form>
         </div>
       </div>

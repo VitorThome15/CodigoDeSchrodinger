@@ -103,7 +103,7 @@
 
 .beneficiariosTable th,
 .beneficiariosTable td {
-  text-align: left;
+  text-align: center; 
   padding: 15px 20px;
   font-size: 0.95rem;
 }
@@ -161,11 +161,11 @@
 
 
 /* Botões de Ação dentro da Tabela */
-.actionButtons {
-  display: flex;
-  gap: 8px; /* Espaço entre Editar e Excluir */
-  justify-content: center; /* Centraliza botões na célula */
-  flex-wrap: wrap; /* Para quebrar linha se necessário em mobile */
+.actionButtons { 
+  display: flex; 
+  gap: 8px; 
+  justify-content: center; 
+  flex-wrap: wrap; 
 }
 
 .editButton, .deleteButton {

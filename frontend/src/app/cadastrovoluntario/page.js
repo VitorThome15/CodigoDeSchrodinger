@@ -49,7 +49,6 @@ const CadastroVoluntario = () => {
     }
 
     try {
-      // 1. Cria o endereço
       const addressRes = await fetch(`${BASE_URL}/addresses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,7 +63,6 @@ const CadastroVoluntario = () => {
       if (!addressRes.ok) throw new Error("Erro ao cadastrar endereço.");
       const address = await addressRes.json();
 
-      // 2. Cria a pessoa
       const personRes = await fetch(`${BASE_URL}/people`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,7 +77,6 @@ const CadastroVoluntario = () => {
       if (!personRes.ok) throw new Error("Erro ao cadastrar pessoa.");
       const person = await personRes.json();
 
-      // 3. Cria o voluntário
       const voluntaryRes = await fetch(`${BASE_URL}/voluntaries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

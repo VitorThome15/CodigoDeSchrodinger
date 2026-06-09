@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReceiverLimitMapper {
     ReceiverLimitResponseDto toResponse(ReceiverLimit receiverLimit) {
+        if (receiverLimit == null) {
+            return null;
+        }
         return new ReceiverLimitResponseDto(
                 receiverLimit.getReceiver().getId(),
                 receiverLimit.getLimit().getId(),

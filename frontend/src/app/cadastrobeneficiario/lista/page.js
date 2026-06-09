@@ -2,184 +2,252 @@
 import React, { useEffect, useState } from "react";
 import MenuBar from "../../components/menubar/menubar";
 import Navigation from "../../components/navegation/navegation";
-// Importar o CSS Modules específico para a lista
 import styles from "./lista.module.css";
-// Se você mantiver o formContainer no styles de cadastrobeneficiario, importe-o também
-// import formStyles from "../cadastrobeneficiario.module.css";
 import { useRouter } from "next/navigation";
 import modalStyles from "./lista.module.css";
 
+const API_URL = "http://localhost:8080/api/receivers";
+const BASE_URL = "http://localhost:8080/api";
+
 export default function ListaBeneficiarios() {
-  const [beneficiarios, setBeneficiarios] = useState([]); // [{id, nomeCompleto, email, telefoneCelular, nif, ...}]
+  const [beneficiarios, setBeneficiarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
+  const [buscaNome, setBuscaNome] = useState("");
+  const [ordemNome, setOrdemNome] = useState("asc");
+  
   const router = useRouter();
+  
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editForm, setEditForm] = useState(null); // objeto do beneficiário a editar
+  const [editForm, setEditForm] = useState(null);
   const [editError, setEditError] = useState("");
   const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    setError("");
-    try {
-      const mock = JSON.parse(localStorage.getItem('mockBeneficiarios') || '[]');
-      setBeneficiarios(mock);
-    } catch (err) {
-      setError("Erro ao carregar beneficiários do mock");
-    } finally {
-      setLoading(false);
-    }
+    fetch(API_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao buscar dados do servidor.");
+        return res.json();
+      })
+      .then((data) => setBeneficiarios(Array.isArray(data) ? data : []))
+      .catch((err) => setError("Erro ao carregar beneficiários"))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleEdit = (id) => {
-    router.push(`/cadastrobeneficiario/editar/${id}`);
-  };
+  const beneficiariosProcessados = beneficiarios
+    .filter((b) => b.person?.name?.toLowerCase().includes(buscaNome.toLowerCase()))
+    .sort((a, b) => {
+      const nomeA = a.person?.name || "";
+      const nomeB = b.person?.name || "";
+      return ordemNome === "asc" ? nomeA.localeCompare(nomeB) : nomeB.localeCompare(nomeA);
+    });
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Tem certeza que deseja excluir este beneficiário?")) return;
     setLoading(true);
-    setError("");
     try {
-      const novos = beneficiarios.filter((b) => b.id !== id);
-      setBeneficiarios(novos);
-      localStorage.setItem('mockBeneficiarios', JSON.stringify(novos));
-      alert("Beneficiário excluído com sucesso!");
-    } catch (err) {
-      setError("Erro ao excluir beneficiário");
-    } finally {
-      setLoading(false);
-    }
+      const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro ao deletar.");
+      setBeneficiarios(beneficiarios.filter((b) => b.id !== id));
+      alert("Beneficiário removido com sucesso!");
+    } catch (err) { setError("Erro ao remover beneficiário"); } finally { setLoading(false); }
   };
 
   const openEditModal = (beneficiario) => {
-    setEditForm({ ...beneficiario });
+    setEditForm({
+      id: beneficiario.id ?? "", 
+      personId: beneficiario.person?.id ?? "", 
+      addressId: beneficiario.person?.address?.id ?? "",
+      nomeCompleto: beneficiario.person?.name ?? "", 
+      email: beneficiario.person?.email ?? "",
+      telefoneCelular: beneficiario.person?.phone ?? "", 
+      cpf: beneficiario.person?.cpf ?? "",
+      endereco: beneficiario.person?.address?.street ?? "", 
+      numero: beneficiario.person?.address?.number ?? "",
+      complemento: beneficiario.person?.address?.complement ?? "", 
+      bairro: beneficiario.person?.address?.neighborhood ?? "",
+      pontoReferencia: beneficiario.person?.address?.referencePoint ?? "",
+    });
+    setEditError("");
     setEditModalOpen(true);
-    setEditError("");
   };
-  const closeEditModal = () => {
-    setEditModalOpen(false);
-    setEditForm(null);
-    setEditError("");
+
+  const closeEditModal = () => { 
+    setEditModalOpen(false); 
+    setEditForm(null); 
+    setEditError(""); 
   };
-  const handleEditChange = (e) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-  const handleEditSubmit = (e) => {
+  
+  const handleEditChange = (e) => setEditForm({ ...editForm, [e.target.name]: e.target.value });
+
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     setEditLoading(true);
     setEditError("");
-    // Validação: pelo menos um dos campos (CPF/CRNM ou NIF) deve ser preenchido
-    const cpfCrnmLimpo = editForm.cpfCrnm.replace(/\D/g, "");
-    const nifLimpo = editForm.nif.replace(/\D/g, "");
-    if (cpfCrnmLimpo.length === 0 && nifLimpo.length === 0) {
-      setEditError("É obrigatório preencher pelo menos um dos campos: CPF/CRNM ou NIF.");
-      setEditLoading(false);
-      return;
-    }
-    if (cpfCrnmLimpo.length > 0 && cpfCrnmLimpo.length !== 11) {
-      setEditError("CPF/CRNM deve conter 11 dígitos numéricos.");
-      setEditLoading(false);
-      return;
-    }
-    // Validação de telefone (aceita ambos formatos)
-    const telefoneLimpo = editForm.telefoneCelular.replace(/\D/g, "");
-    if (telefoneLimpo.length < 10 || telefoneLimpo.length > 11) {
-      setEditError("Telefone deve conter entre 10 e 11 dígitos (incluindo DDD).");
-      setEditLoading(false);
-      return;
-    }
-    if (!/\S+@\S+\.\S+/.test(editForm.email)) {
-      setEditError("Por favor, insira um e-mail válido.");
-      setEditLoading(false);
-      return;
-    }
+    
+    const cpfLimpo = (editForm.cpf || "").replace(/\D/g, "");
+    
     try {
-      const novos = beneficiarios.map((b) => b.id === editForm.id ? { ...editForm, cpfCrnm: cpfCrnmLimpo, nif: nifLimpo } : b);
-      setBeneficiarios(novos);
-      localStorage.setItem('mockBeneficiarios', JSON.stringify(novos));
-      setEditModalOpen(false);
-      setEditForm(null);
-    } catch (err) {
-      setEditError("Erro ao salvar edição");
-    } finally {
-      setEditLoading(false);
+      if (editForm.addressId) {
+        const resAddress = await fetch(`${BASE_URL}/addresses/${editForm.addressId}`, {
+          method: "PUT", 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            street: editForm.endereco, 
+            neighborhood: editForm.bairro, 
+            number: Number(editForm.numero), 
+            complement: editForm.complemento, 
+            referencePoint: editForm.pontoReferencia 
+          })
+        });
+        
+        if (!resAddress.ok) {
+          const txtErro = await resAddress.text();
+          throw new Error(`O servidor recusou a atualização do Endereço (Status ${resAddress.status}): ${txtErro}`);
+        }
+      }
+      
+      if (editForm.personId) {
+        const resPerson = await fetch(`${BASE_URL}/people/${editForm.personId}`, {
+          method: "PUT", 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            name: editForm.nomeCompleto, 
+            phone: editForm.telefoneCelular, 
+            email: editForm.email, 
+            cpf: cpfLimpo, 
+            idAddress: editForm.addressId 
+          })
+        });
+        
+        if (!resPerson.ok) {
+          const txtErro = await resPerson.text();
+          throw new Error(`O servidor recusou os dados da Pessoa (Status ${resPerson.status}): ${txtErro}`);
+        }
+      }
+      
+      setBeneficiarios(beneficiarios.map(b => 
+        b.id === editForm.id 
+          ? { 
+              ...b, 
+              person: { 
+                ...b.person, 
+                name: editForm.nomeCompleto, 
+                email: editForm.email, 
+                phone: editForm.telefoneCelular, 
+                cpf: cpfLimpo, 
+                address: { 
+                  ...b.person?.address, 
+                  street: editForm.endereco, 
+                  neighborhood: editForm.bairro,
+                  number: Number(editForm.numero),
+                  complement: editForm.complemento,
+                  referencePoint: editForm.pontoReferencia
+                } 
+              } 
+            } 
+          : b
+      ));
+      
+      closeEditModal();
+      alert("Beneficiário atualizado com sucesso!");
+    } catch (err) { 
+      setEditError(err.message); 
+      alert("Falha ao salvar alterações:\n" + err.message);
+    } finally { 
+      setEditLoading(false); 
     }
   };
 
   return (
     <div className={styles.containerGeral}>
-      <MenuBar />
-      <Navigation />
-      <div className={styles.contentWrapper}> {/* Novo wrapper para centralização e largura */}
-        <div className={styles.listContainer}> {/* Usando listContainer para diferenciar do formContainer */}
+      <MenuBar /><Navigation />
+      <div className={styles.contentWrapper}>
+        <div className={styles.listContainer}>
           <h1 className={styles.titulo}>Beneficiários Cadastrados</h1>
-          <div className={styles.decoracao}></div> {/* Linha decorativa */}
-
+          <div className={styles.decoracao}></div>
+          
           <div className={styles.actionsHeader}>
-            <button
-              className={styles.addButton}
-              onClick={() => router.push("/cadastrobeneficiario")}
-            >
-              + Adicionar Beneficiário
-            </button>
+            <button className={styles.addButton} onClick={() => router.push("/cadastrobeneficiario")}>+ Adicionar Beneficiário</button>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <input type="text" className={styles.formInput} placeholder="Buscar..." value={buscaNome} onChange={(e) => setBuscaNome(e.target.value)} style={{ width: '250px', padding: '10px' }} />
+              
+              <button 
+                onClick={() => setOrdemNome(ordemNome === "asc" ? "desc" : "asc")} 
+                style={{ 
+                  padding: '10px 16px', 
+                  borderRadius: '8px', 
+                  border: 'none', 
+                  background: 'var(--color-primary, #1976d2)', 
+                  color: '#fff', 
+                  cursor: 'pointer', 
+                  fontWeight: '600',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Ordem: {ordemNome === "asc" ? "A - Z ↓" : "Z - A ↑"}
+              </button>
+            </div>
           </div>
-          <div className={styles.tableWrapper}> {/* Para permitir rolagem em telas pequenas */}
+
+          <div className={styles.tableWrapper}>
             <table className={styles.beneficiariosTable}>
               <thead>
                 <tr>
                   <th>Nome</th>
                   <th>Email</th>
                   <th>Telefone</th>
-                  <th>NIF</th>
+                  <th>CPF</th>
+                  <th>Bairro</th>
                   <th>Ações</th>
                 </tr>
               </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={5} className={styles.loadingMessage}>Carregando...</td>
-                  </tr>
-                ) : error ? (
-                  <tr>
-                    <td colSpan={5} className={styles.errorMessage}>{error}</td>
-                  </tr>
-                ) : beneficiarios.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className={styles.noDataMessage}>Nenhum beneficiário cadastrado ainda.</td>
-                  </tr>
-                ) : (
-                  beneficiarios.map((b) => (
-                    <tr key={b.id}>
-                      <td>{b.nomeCompleto}</td>
-                      <td>{b.email}</td>
-                      <td>{b.telefoneCelular}</td>
-                      <td>{b.nif || '–'}</td>
+              
+              {/* MÁGICA AQUI: Isolar os estados em <tbody> diferentes blinda o React contra extensões do navegador */}
+              
+              {loading && (
+                <tbody>
+                  <tr><td colSpan={6} className={styles.loadingMessage}>Carregando...</td></tr>
+                </tbody>
+              )}
+
+              {error && (
+                <tbody>
+                  <tr><td colSpan={6} className={styles.errorMessage}>{error}</td></tr>
+                </tbody>
+              )}
+
+              {!loading && !error && beneficiariosProcessados.length === 0 && (
+                <tbody>
+                  <tr><td colSpan={6} className={styles.noDataMessage}>Nenhum beneficiário encontrado.</td></tr>
+                </tbody>
+              )}
+
+              {!loading && !error && beneficiariosProcessados.length > 0 && (
+                <tbody>
+                  {beneficiariosProcessados.map((b, index) => (
+                    /* Adicionado o || index como camada extra de segurança caso o banco devolva um ID vazio */
+                    <tr key={b.id || index}>
+                      <td style={{ textTransform: "capitalize" }}>{b.person?.name}</td>
+                      <td>{b.person?.email}</td>
+                      <td>{b.person?.phone}</td>
+                      <td>{b.person?.cpf || "–"}</td>
+                      <td style={{ textTransform: "capitalize" }}>{b.person?.address?.neighborhood || "–"}</td>
                       <td className={styles.actionButtons}>
-                        <button 
-                          className={styles.editButton} 
-                          onClick={() => openEditModal(b)}
-                          disabled={loading}
-                        >
-                          Editar
-                        </button>
-                        <button 
-                          className={styles.deleteButton} 
-                          onClick={() => handleDelete(b.id)}
-                          disabled={loading}
-                        >
-                          Excluir
-                        </button>
+                        <button className={styles.editButton} onClick={() => openEditModal(b)}>Editar</button>
+                        <button className={styles.deleteButton} onClick={() => handleDelete(b.id)}>Excluir</button>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
+                  ))}
+                </tbody>
+              )}
             </table>
           </div>
         </div>
       </div>
-      {/* Modal de edição */}
+
       {editModalOpen && (
         <div className={modalStyles.modalOverlay}>
           <div className={modalStyles.modalContent}>
@@ -187,50 +255,57 @@ export default function ListaBeneficiarios() {
             <form onSubmit={handleEditSubmit} className={modalStyles.formulario}>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_nomeCompleto"><b>Nome completo*</b></label>
-                <input id="edit_nomeCompleto" name="nomeCompleto" value={editForm.nomeCompleto} onChange={handleEditChange} required placeholder="Fulano da Silva" />
+                <input id="edit_nomeCompleto" name="nomeCompleto" value={editForm.nomeCompleto} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_email"><b>E-mail*</b></label>
-                <input id="edit_email" name="email" type="email" value={editForm.email} onChange={handleEditChange} required placeholder="fulano@gmail.com" />
+                <input id="edit_email" name="email" type="email" value={editForm.email} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_telefoneCelular"><b>Telefone*</b></label>
-                <input id="edit_telefoneCelular" name="telefoneCelular" value={editForm.telefoneCelular} onChange={handleEditChange} required placeholder="(45) 9 9988-7766" type="tel" />
+                <input id="edit_telefoneCelular" name="telefoneCelular" value={editForm.telefoneCelular} onChange={handleEditChange} required type="tel" />
               </div>
               <div className={modalStyles.formGroup}>
-                <label htmlFor="edit_cpfCrnm"><b>CPF/CRNM (opcional se NIF for preenchido)</b></label>
-                <input id="edit_cpfCrnm" name="cpfCrnm" type="text" pattern="[0-9]*" maxLength={11} value={editForm.cpfCrnm} onChange={e => { const onlyNums = e.target.value.replace(/\D/g, ""); setEditForm({ ...editForm, cpfCrnm: onlyNums }); }} placeholder="11122233355" />
+                <label htmlFor="edit_cpf"><b>CPF*</b></label>
+                <input id="edit_cpf" name="cpf" value={editForm.cpf} onChange={handleEditChange} required />
               </div>
-              <div className={modalStyles.formGroup}>
-                <label htmlFor="edit_nif"><b>NIF (opcional se CPF/CRNM for preenchido)</b></label>
-                <input id="edit_nif" name="nif" type="text" pattern="[0-9]*" value={editForm.nif} onChange={e => { const onlyNums = e.target.value.replace(/\D/g, ""); setEditForm({ ...editForm, nif: onlyNums }); }} placeholder="123456789" />
-              </div>
-              <hr className={modalStyles.separador} />
               <div className={modalStyles.formGroupFullWidth}>
                 <label htmlFor="edit_endereco"><b>Endereço*</b></label>
-                <input id="edit_endereco" name="endereco" value={editForm.endereco} onChange={handleEditChange} required placeholder="Rua da Água" />
+                <input id="edit_endereco" name="endereco" value={editForm.endereco} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_numero"><b>Número*</b></label>
-                <input id="edit_numero" name="numero" type="number" value={editForm.numero} onChange={handleEditChange} required placeholder="2015" />
+                <input id="edit_numero" name="numero" type="number" value={editForm.numero} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroup}>
                 <label htmlFor="edit_complemento"><b>Complemento</b></label>
-                <input id="edit_complemento" name="complemento" value={editForm.complemento} onChange={handleEditChange} placeholder="Ap 307" />
+                <input id="edit_complemento" name="complemento" value={editForm.complemento} onChange={handleEditChange} />
               </div>
               <div className={modalStyles.formGroupFullWidth}>
                 <label htmlFor="edit_bairro"><b>Bairro*</b></label>
-                <input id="edit_bairro" name="bairro" value={editForm.bairro} onChange={handleEditChange} required placeholder="Centro" />
+                <input id="edit_bairro" name="bairro" value={editForm.bairro} onChange={handleEditChange} required />
               </div>
               <div className={modalStyles.formGroupFullWidth}>
                 <label htmlFor="edit_pontoReferencia"><b>Ponto de referência</b></label>
-                <input id="edit_pontoReferencia" name="pontoReferencia" value={editForm.pontoReferencia} onChange={handleEditChange} placeholder="Em frente ao parque" />
+                <input id="edit_pontoReferencia" name="pontoReferencia" value={editForm.pontoReferencia} onChange={handleEditChange} />
               </div>
-              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', width: '100%' }}>
-                <button type="button" onClick={closeEditModal} style={{ background: '#aaa', color: '#fff' }}>Cancelar</button>
-                <button type="submit" disabled={editLoading}>{editLoading ? "Salvando..." : "Salvar Alterações"}</button>
+              <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', alignItems: 'center', width: '100%', gridColumn: '1 / -1', marginTop: '20px' }}>
+              <button 
+                type="button" 
+                onClick={closeEditModal} 
+                style={{ background: '#aaa', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', width: '100%', maxWidth: '200px', textAlign: 'center' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="submit" 
+                disabled={editLoading} 
+                style={{ background: 'var(--color-primary, #18132b)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', width: '100%', maxWidth: '200px', textAlign: 'center' }}
+              >
+                {editLoading ? "Salvando..." : "Salvar Alterações"}
+              </button>
               </div>
-              {editError && <div className={modalStyles.errorMessage}>{editError}</div>}
+              {editError && <div className={modalStyles.errorMessage} style={{ gridColumn: "1 / -1", marginTop: "10px" }}>{editError}</div>}
             </form>
           </div>
         </div>

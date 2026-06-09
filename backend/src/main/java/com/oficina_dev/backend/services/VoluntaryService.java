@@ -42,11 +42,11 @@ public class VoluntaryService {
     }
 
     public List<VoluntaryResponseDto> getAll() {
-        logger.info("Fetching all voluntaries");
-        List<Voluntary> voluntaries = voluntaryRepository.findAll();
-        logger.info("Found {} voluntaries", voluntaries.size());
+        List<Voluntary> voluntaries = this.voluntaryRepository.findByIsActiveTrue();
+            
+        // Correção: Usando o mapper para converter de Voluntary para Dto
         return voluntaries.stream()
-                .map(voluntaryMapper::toResponse)
+                .map(voluntary -> this.voluntaryMapper.toResponse(voluntary))
                 .toList();
     }
 
@@ -100,22 +100,22 @@ public class VoluntaryService {
 
     @Transactional
     public VoluntaryRemovedResponseDto delete(UUID id) {
-        logger.info("Iniciando exclusão física e definitiva do voluntário: {}", id);
+        logger.info("Iniciando desativação (Soft Delete) do voluntário: {}", id);
         
         // Busca o voluntário
         Voluntary voluntary = this.findById(id);
 
-        // Prepara a resposta ANTES de apagar
+        // Prepara a resposta
         VoluntaryRemovedResponseDto response = this.voluntaryMapper.toRemovedResponse(voluntary);
 
         try {
-            // Apaga o voluntário (person, donations e transfers são removidas automaticamente por cascata)
-            this.voluntaryRepository.delete(voluntary);
-            this.voluntaryRepository.flush();
+            // MÁGICA AQUI: Em vez de apagar fisicamente, nós apenas desativamos!
+            voluntary.setActive(false);
+            this.voluntaryRepository.saveAndFlush(voluntary);
             
-            logger.info("Voluntário, Pessoa e dependências removidos DEFINITIVAMENTE com sucesso!");
+            logger.info("Voluntário desativado com sucesso (continua no banco para histórico)!");
         } catch (Exception e) {
-            logger.error("Erro ao tentar excluir fisicamente o voluntário {}: {}", id, e.getMessage(), e);
+            logger.error("Erro ao tentar desativar o voluntário {}: {}", id, e.getMessage(), e);
             throw e;
         }
         

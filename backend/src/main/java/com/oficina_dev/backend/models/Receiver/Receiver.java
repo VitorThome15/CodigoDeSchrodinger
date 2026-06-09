@@ -49,18 +49,23 @@ public class Receiver {
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Transfer> transfers;
 
+    // AQUI: Adicionado campo para o Soft Delete
+    @Setter
+    @Column(name = "is_active")
+    private Boolean isActive = true;
+
     public Receiver(String nif, Boolean isFit, Person person) {
         setNif(nif);
         this.isFit = isFit;
         this.person = person;
     }
 
-
     public ReceiverLimit getAtualReceiverLimit() {
         if (this.receiverLimits == null || this.receiverLimits.isEmpty()) {
             return null;
         }
-        return this.receiverLimits.get(receiverLimits.size() - 1); } // Mudado para retornar o último elemento da lista 06/10    }
+        return this.receiverLimits.get(receiverLimits.size() - 1); 
+    }
 
     public void setNif(String nif) {
         //TODO: IMPLEMENT NIF VALIDATION HERE
@@ -73,5 +78,4 @@ public class Receiver {
     public void setFit(Boolean fit) {
         this.isFit = fit;
     }
-
 }

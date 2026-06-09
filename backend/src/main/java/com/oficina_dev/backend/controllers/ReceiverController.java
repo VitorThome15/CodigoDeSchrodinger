@@ -67,4 +67,10 @@ public class ReceiverController {
         return ResponseEntity.ok(receiverResponseDto);
     }
 
+    // Rota para o Soft Delete do Beneficiário
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        this.receiverService.delete(id);
+        return ResponseEntity.noContent().build(); // Retorna status 204 (Sucesso sem conteúdo)
+    }
 }

@@ -41,7 +41,7 @@ public class Voluntary {
     private ZonedDateTime updatedAt;
 
     @JsonSetter
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE) // <- Isso avisa o banco para deletar a Pessoa também
     @JoinColumn(name = "id_person", referencedColumnName = "id")
     private Person person;
 
