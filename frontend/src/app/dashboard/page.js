@@ -24,83 +24,57 @@ export default function DashboardPage() {
   const [recentActions, setRecentActions] = useState([]);
   const [chartData, setChartData] = useState([]);
 
-  function getItemQuantity(item) {
-    return (
-      Number(
-        item?.quantity ??
-          item?.quantidade ??
-          item?.qtd ??
-          item?.qtde ??
-          item?.unidades ??
-          0
-      ) || 0
-    );
-  }
-
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    try {
-      const voluntarios = JSON.parse(
-        localStorage.getItem("mockVoluntarios") || "[]"
-      );
-      const beneficiarios = JSON.parse(
-        localStorage.getItem("mockBeneficiarios") || "[]"
-      );
-      const doadores = JSON.parse(
-        localStorage.getItem("mockDoadores") || "[]"
-      );
-      const estoque = JSON.parse(
-        localStorage.getItem("mockEstoque") || "[]"
-      );
-
-      let doacoesRaw = [];
+    async function loadDashboardData() {
       try {
-        doacoesRaw = JSON.parse(
-          localStorage.getItem("mockDoacoes") || "[]"
-        );
-      } catch {
-        doacoesRaw = [];
+        // 1. Busca os totais reais da rota /api/stats
+        const statsRes = await fetch("http://localhost:8080/api/stats");
+        if (statsRes.ok) {
+          const data = await statsRes.json();
+          setStats({
+            people: data.people || 0,
+            donations: data.donations || 0,
+            receivers: data.receivers || 0,
+            items: data.itemsUnits || 0, // Usa a contagem de unidades somadas do backend
+            volunteers: data.volunteers || 0,
+            givers: data.givers || 0,
+          });
+        }
+
+        // 2. Busca a lista de doações para o Gráfico e as Últimas Ações
+        const donationsRes = await fetch("http://localhost:8080/api/donations");
+        if (donationsRes.ok) {
+          const donationsRaw = await donationsRes.json();
+
+          // Normaliza os dados que vêm do Java
+          const doacoesNormalizadas = (donationsRaw || [])
+            .map((d) => ({
+              // Tenta pegar o nome da pessoa vinculada ao doador, ou cai num valor padrão
+              user: d.giver?.person?.name || "Doador", 
+              action: "Doação registrada",
+              date: normalizeDate(d),
+            }))
+            .sort((a, b) => {
+              const da = a.date ? new Date(a.date).getTime() : 0;
+              const db = b.date ? new Date(b.date).getTime() : 0;
+              return db - da; // Mais recente primeiro
+            });
+
+          setRecentActions(doacoesNormalizadas.slice(0, 3));
+
+          const donationsForChart = doacoesNormalizadas.map((d) => ({
+            date: d.date,
+          }));
+          setChartData(groupByMonth(donationsForChart, 12));
+        }
+      } catch (err) {
+        console.error("Erro ao buscar dados do servidor:", err);
       }
-
-      const peopleCount =
-        voluntarios.length + beneficiarios.length + doadores.length;
-
-      const itemsUnits = (estoque || []).reduce(
-        (acc, item) => acc + getItemQuantity(item),
-        0
-      );
-
-      setStats({
-        people: peopleCount,
-        donations: doacoesRaw.length,
-        receivers: beneficiarios.length,
-        volunteers: voluntarios.length,
-        givers: doadores.length,
-        items: itemsUnits,
-      });
-
-      const doacoesNormalizadas = (doacoesRaw || [])
-        .map((d) => ({
-          user: d.user ?? d.nomeDoador ?? "Doador",
-          action: d.action ?? "Doação registrada",
-          date: normalizeDate(d),
-        }))
-        .sort((a, b) => {
-          const da = a.date ? new Date(a.date).getTime() : 0;
-          const db = b.date ? new Date(b.date).getTime() : 0;
-          return db - da;
-        });
-
-      setRecentActions(doacoesNormalizadas.slice(0, 3));
-
-      const donationsForChart = doacoesNormalizadas.map((d) => ({
-        date: d.date,
-      }));
-      setChartData(groupByMonth(donationsForChart, 12)); // 👈 12 meses
-    } catch (err) {
-      console.error("Erro ao ler dados do localStorage:", err);
     }
+
+    loadDashboardData();
   }, []);
 
   return (
@@ -130,14 +104,10 @@ export default function DashboardPage() {
           >
             <Card title="Pessoas" value={stats.people} color="#0070f3" />
             <Card title="Doações" value={stats.donations} color="#10b981" />
-            <Card title="Receptores" value={stats.receivers} color="#f59e0b" />
+            <Card title="Beneficiários" value={stats.receivers} color="#f59e0b" />
             <Card title="Voluntários" value={stats.volunteers} color="#ec4899" />
             <Card title="Doadores" value={stats.givers} color="#3b82f6" />
-            <Card
-              title="Unidades em Estoque"
-              value={stats.items}
-              color="#6366f1"
-            />
+            <Card title="Unidades em Estoque" value={stats.items} color="#6366f1" />
           </div>
 
           {/* Gráfico */}
@@ -197,7 +167,7 @@ export default function DashboardPage() {
                   <tr>
                     <td
                       colSpan={3}
-                      style={{ padding: "10px", color: "#6b7280" }}
+                      style={{ padding: "10px", color: "#6b7280", textAlign: "center" }}
                     >
                       Sem registros recentes.
                     </td>
@@ -210,7 +180,9 @@ export default function DashboardPage() {
                     >
                       <td style={{ padding: "10px" }}>{a.user ?? "—"}</td>
                       <td style={{ padding: "10px" }}>{a.action ?? "—"}</td>
-                      <td style={{ padding: "10px" }}>{a.date ?? "—"}</td>
+                      <td style={{ padding: "10px" }}>
+                        {a.date ? new Date(a.date).toLocaleDateString('pt-BR') : "—"}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -222,6 +194,8 @@ export default function DashboardPage() {
     </>
   );
 }
+
+// Funções Utilitárias
 
 function normalizeDate(d) {
   const raw =
@@ -250,7 +224,7 @@ function groupByMonth(donations, monthsBack = 4) {
 
   (donations ?? []).forEach((don) => {
     if (!don?.date) return;
-    const dt = new Date(d.date);
+    const dt = new Date(don.date); // <-- Corrigido aqui de "d.date" para "don.date"
     if (isNaN(dt.getTime())) return;
     const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
     const b = buckets.find((x) => x.key === key);

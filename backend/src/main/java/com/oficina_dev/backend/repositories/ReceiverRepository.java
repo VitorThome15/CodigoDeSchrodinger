@@ -14,4 +14,6 @@ public interface ReceiverRepository extends JpaRepository<Receiver, UUID> {
 
     // Mágica do Soft Delete
     List<Receiver> findByIsActiveTrue();
+
+    long countByIsActiveTrue();
 }

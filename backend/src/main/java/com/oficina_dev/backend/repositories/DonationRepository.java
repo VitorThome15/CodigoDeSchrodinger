@@ -8,6 +8,6 @@ import java.util.UUID;
 
 public interface DonationRepository extends JpaRepository<Donation, UUID> {
 
-    // 🔁 TROQUE "CreatedAt" pelo nome real do campo de data da sua entidade Donation
     List<Donation> findTop3ByOrderByCreatedAtDesc();
+
 }

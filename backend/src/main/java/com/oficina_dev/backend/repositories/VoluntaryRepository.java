@@ -16,4 +16,6 @@ public interface VoluntaryRepository extends JpaRepository<Voluntary, UUID> {
 
     // O método do Soft Delete que nós implementamos:
     List<Voluntary> findByIsActiveTrue();
+
+    long countByIsActiveTrue();
 }

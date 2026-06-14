@@ -23,15 +23,14 @@ public class StatsService {
     public StatsDto get() {
         long people        = personRepo.count();
         long donations     = donationRepo.count();
-        long receivers     = receiverRepo.count();
-        long volunteers    = voluntaryRepo.count();
-        long givers        = giverRepo.count();
+        long receivers     = receiverRepo.countByIsActiveTrue();
+        long volunteers    = voluntaryRepo.countByIsActiveTrue();
+        long givers        = giverRepo.countByIsActiveTrue();
         long itemsDistinct = itemRepo.count();
 
         Long units = itemRepo.sumQuantities(); // pode vir null
         long itemsUnits = (units != null) ? units : 0L;
 
-        // ❌ Nada de ação fake, deixa vazio.
         List<RecentActionDto> actions = List.of();
 
         return new StatsDto(

@@ -12,4 +12,6 @@ public interface GiverRepository extends JpaRepository<Giver, UUID> {
     boolean existsByPersonId(UUID personId);
     
     List<Giver> findByIsActiveTrue();
+
+    long countByIsActiveTrue();
 }
