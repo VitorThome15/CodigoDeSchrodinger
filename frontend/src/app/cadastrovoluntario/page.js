@@ -148,9 +148,27 @@ const CadastroVoluntario = () => {
               <label htmlFor="pontoReferencia"><b>Ponto de referência</b></label>
               <input id="pontoReferencia" name="pontoReferencia" value={form.pontoReferencia} onChange={handleChange} placeholder="Em frente ao parque" />
             </div>
-            <button type="submit" disabled={loading}>
-              {loading ? "Cadastrando..." : "Cadastrar Voluntário"}
-            </button>
+            
+            {/* NOVO GRUPO DE BOTÕES */}
+            <div className={styles.buttonGroup}>
+              <button 
+                type="button" 
+                className={styles.cancelButton}
+                onClick={() => window.history.back()}
+                disabled={loading}
+              >
+                Cancelar
+              </button>
+              
+              <button 
+                type="submit" 
+                className={styles.submitButton}
+                disabled={loading}
+              >
+                {loading ? "Cadastrando..." : "Cadastrar Voluntário"}
+              </button>
+            </div>
+
             {error && <div className={styles.errorMessage}>{error}</div>}
           </form>
         </div>

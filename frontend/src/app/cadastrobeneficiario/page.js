@@ -155,18 +155,21 @@ const CadastroBeneficiario = () => {
               <input id="pontoReferencia" name="pontoReferencia" value={form.pontoReferencia} onChange={handleChange} placeholder="Em frente ao parque" />
             </div>
             
-            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', width: '100%', marginTop: '20px' }}>
+            {/* GRUPO DE BOTÕES PADRONIZADO */}
+            <div className={styles.buttonGroup}>
               <button 
                 type="button" 
-                onClick={() => router.push('/cadastrobeneficiario/lista')} 
-                style={{ background: '#aaa', color: '#fff', border: 'none', padding: '14px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', width: '100%', maxWidth: '250px' }}
+                className={styles.cancelButton}
+                onClick={() => router.push('/cadastrobeneficiario/lista')}
+                disabled={loading}
               >
                 Cancelar
               </button>
+              
               <button 
                 type="submit" 
-                disabled={loading} 
-                style={{ background: 'var(--color-primary, #18132b)', color: '#fff', border: 'none', padding: '14px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', width: '100%', maxWidth: '250px' }}
+                className={styles.submitButton}
+                disabled={loading}
               >
                 {loading ? "Cadastrando..." : "Cadastrar Beneficiário"}
               </button>

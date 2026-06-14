@@ -83,21 +83,12 @@
   font-size: 1.08rem;
   color: #18132b;
   border: 1.5px solid #18132b;
+  border-radius: 8px; /* Adicionado um leve arredondamento para combinar com os botões */
 }
 
 .formulario input:focus {
-  border: 1.5px solid #18132b;
-}
-
-.formulario button {
-  grid-column: 1 / -1;
-  margin: 32px auto 0 auto;
-  font-size: 1.2rem;
-  padding: 18px 0;
-  width: 60%;
-  display: block;
-  background: #18132b;
-  color: #fff;
+  border: 1.5px solid #0070f3; /* Destaque azul no input ativo */
+  outline: none;
 }
 
 .errorMessage {
@@ -107,17 +98,81 @@
   font-weight: 600;
 }
 
+/* ========================================= */
+/* GRUPO DE BOTÕES (CADASTRAR E CANCELAR)    */
+/* ========================================= */
+
+.buttonGroup {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 32px;
+  width: 100%;
+}
+
+/* Botão Secundário (Cinza Claro) */
+.cancelButton {
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 16px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 40%;
+}
+
+.cancelButton:hover {
+  background-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+/* Botão Principal (Azul) */
+.submitButton {
+  background-color: #0070f3; 
+  color: #ffffff;
+  border: none;
+  padding: 16px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 40%;
+}
+
+.submitButton:hover {
+  background-color: #005bb5;
+  transform: translateY(-1px);
+}
+
+/* ========================================= */
+/* RESPONSIVIDADE                            */
+/* ========================================= */
+
 @media (max-width: 900px) {
   .formContainer {
-    padding: 18px 2vw;
+    padding: 24px 5vw;
     max-width: 99vw;
   }
+  
   .formulario {
     grid-template-columns: 1fr;
     gap: 14px 0;
   }
-  .formulario button {
-    width: 100%;
-    margin-top: 18px;
+  
+  /* Ajuste dos botões no celular */
+  .buttonGroup {
+    flex-direction: column-reverse; /* Coloca o Cancelar embaixo no mobile */
+    gap: 12px;
+    margin-top: 24px;
   }
-} 
+  
+  .submitButton, 
+  .cancelButton {
+    width: 100%;
+  }
+}

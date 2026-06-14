@@ -1,166 +1,144 @@
 /* src/app/cadastrobeneficiario/cadastrobeneficiario.module.css */
 
-/* Container Geral da Página */
 .containerGeral {
   min-height: 100vh;
-  /* background: var(--color-bg); removido, já no body global */
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centraliza horizontalmente o conteúdo principal */
+  align-items: center;
   justify-content: flex-start;
-  padding-bottom: 40px; /* Espaço para o final da página */
+  padding-bottom: 40px;
 }
 
-/* Wrapper para o formulário (centraliza e controla a largura máxima) */
 .formWrapper {
-  flex-grow: 1; /* Permite que o wrapper ocupe o espaço restante */
+  flex-grow: 1;
   width: 100%;
-  max-width: 1000px; /* Largura máxima um pouco maior para o formulário */
-  padding: 20px; /* Padding nas laterais em telas maiores */
+  max-width: 1000px;
+  padding: 20px;
   display: flex;
-  justify-content: center; /* Centraliza o formContainer dentro do wrapper */
-  align-items: flex-start; /* Alinha o conteúdo ao topo */
+  justify-content: center;
+  align-items: flex-start;
 }
 
-/* Contêiner do Formulário em si */
 .formContainer {
-  background: var(--color-bg-alt); /* Usa a variável global */
+  background: var(--color-bg-alt);
   border-radius: 18px;
-  box-shadow: 0 4px 30px 0 rgba(0, 0, 0, 0.08); /* Sombra mais suave */
-  padding: 40px 60px; /* Padding interno aumentado */
-  width: 100%; /* Ocupa toda a largura do formWrapper */
-  border: 1px solid var(--color-border-light); /* Usa a variável global */
+  box-shadow: 0 4px 30px 0 rgba(0, 0, 0, 0.08);
+  padding: 40px 60px;
+  width: 100%;
+  border: 1px solid var(--color-border-light);
   display: flex;
   flex-direction: column;
 }
 
-/* Título da Página */
 .titulo {
   text-align: center;
-  font-size: 2.5rem; /* Fonte maior */
-  color: var(--color-text); /* Usa a variável global */
+  font-size: 2.5rem;
+  color: var(--color-text);
   margin-bottom: 12px;
   font-weight: 800;
   letter-spacing: 0.5px;
-  position: relative; /* Para a decoração */
-  padding-bottom: 10px; /* Espaço para a linha abaixo */
 }
 
 .decoracao {
-  width: 80px; /* Linha de decoração mais larga */
-  height: 6px; /* Linha de decoração mais grossa */
-  background: var(--color-primary); /* Usa a variável global (azul primário) */
-  margin: 0 auto 30px auto; /* Centraliza e adiciona margem inferior */
+  width: 80px;
+  height: 6px;
+  background: var(--color-primary);
+  margin: 0 auto 30px auto;
   border-radius: 3px;
 }
 
-/* Separador dentro do formulário */
 .separador {
   width: 100%;
-  height: 1px; /* Linha mais fina */
-  background: var(--color-border-light); /* Usa a variável global */
+  height: 1px;
+  background: var(--color-border-light);
   border: none;
-  margin: 30px 0; /* Margem para separar os grupos de campos */
-  grid-column: 1 / -1; /* Ocupa a largura total no grid */
+  margin: 30px 0;
+  grid-column: 1 / -1;
 }
 
-/* Formulário Principal com Grid */
 .formulario {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Colunas responsivas */
-  gap: 25px 35px; /* Espaçamento entre campos */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px 35px;
   width: 100%;
 }
 
-/* Grupos de Campo (label + input) */
-.formGroup {
+.formGroup, .formGroupFullWidth {
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
 
-/* Estilos de input e label serão herdados do global.
-   Sobrescrevendo apenas se houver uma necessidade específica local.
-   Por exemplo, se quiser um margin-bottom diferente para a label *neste* formulário:
-*/
-/* .formGroup label {
-  margin-bottom: 8px;
-} */
-
-
-/* Campos que devem ocupar a largura total em uma linha (para o Grid) */
 .formGroupFullWidth {
-  grid-column: 1 / -1; /* Faz com que ocupe todas as colunas disponíveis */
+  grid-column: 1 / -1;
+}
+
+/* ========================================= */
+/* GRUPO DE BOTÕES (AZUL E CINZA)            */
+/* ========================================= */
+
+.buttonGroup {
+  grid-column: 1 / -1;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 32px;
+  width: 100%;
 }
 
-
-/* Botão de Envio */
-.formulario button {
-  grid-column: 1 / -1; /* Ocupa a largura total da grade */
-  margin: 40px auto 0 auto; /* Centraliza horizontalmente e adiciona margem superior */
-  font-size: 1.3rem; /* Fonte maior para o botão */
-  font-weight: 700;
-  padding: 16px 40px; /* Padding generoso */
-  width: 50%; /* Largura do botão */
-  max-width: 350px; /* Largura máxima para o botão */
-  /* background, color, border, border-radius, cursor, transition, box-shadow vêm do global */
-  /* Remove as propriedades duplicadas que já estão no global.
-     Se quiser um background diferente, pode sobrescrever aqui.
-     Exemplo: background: var(--color-primary); */
+.cancelButton {
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 16px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 40%;
+  max-width: 250px;
 }
 
-.formulario button:hover:not(:disabled) {
-  /* background: var(--color-primary-dark); vindo do global, não precisa sobrescrever a menos que queira um hover diferente */
-  transform: translateY(-2px); /* Efeito de elevação */
+.cancelButton:hover {
+  background-color: #d1d5db;
+  transform: translateY(-1px);
 }
 
-.formulario button:disabled {
-  background-color: #cccccc; /* Manter este aqui se quiser um cinza específico para disabled */
-  cursor: not-allowed;
-  box-shadow: none;
+.submitButton {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  padding: 16px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  width: 40%;
+  max-width: 250px;
 }
 
-/* Mensagem de Erro */
+.submitButton:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
 .errorMessage {
   grid-column: 1 / -1;
-  color: var(--color-error); /* Usa a variável global */
+  color: var(--color-error);
   background-color: rgba(231, 76, 60, 0.1);
-  border: 1px solid var(--color-error); /* Usa a variável global */
+  border: 1px solid var(--color-error);
   padding: 12px 20px;
   border-radius: 8px;
   margin-top: 15px;
   text-align: center;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* Responsividade para telas menores */
 @media (max-width: 768px) {
-  .formContainer {
-    padding: 30px 30px; /* Reduz padding em telas menores */
-  }
-  .formulario {
-    grid-template-columns: 1fr; /* Uma coluna em telas muito pequenas */
-    gap: 20px 0;
-  }
-  .formGroupFullWidth {
-    grid-column: 1; /* Garante que ocupe a única coluna */
-  }
-  .formulario button {
-    width: 80%; /* Botão mais largo em mobile */
-  }
-}
-
-@media (max-width: 480px) {
-  .titulo {
-    font-size: 2rem;
-  }
-  .formContainer {
-    padding: 20px 15px;
-  }
-  .formulario button {
-    width: 95%; /* Quase largura total */
-    padding: 14px 20px;
-  }
+  .formContainer { padding: 30px 20px; }
+  .formulario { grid-template-columns: 1fr; gap: 20px 0; }
+  .buttonGroup { flex-direction: column-reverse; gap: 12px; }
+  .submitButton, .cancelButton { width: 100%; max-width: none; }
 }

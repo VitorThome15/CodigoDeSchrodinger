@@ -7,7 +7,6 @@ import styles from "./cadastrodoador.module.css";
 
 const BASE_URL = "http://localhost:8080/api";
 
-
 const CadastroDoador = () => {
   const [form, setForm] = useState({
     nomeCompleto: "",
@@ -57,7 +56,7 @@ const CadastroDoador = () => {
       const address = await addressRes.json();
 
       // 2. Cria a pessoa
-     const personRes = await fetch(`${BASE_URL}/people`, {
+      const personRes = await fetch(`${BASE_URL}/people`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -135,9 +134,27 @@ const CadastroDoador = () => {
               <label htmlFor="pontoReferencia"><b>Ponto de referência</b></label>
               <input id="pontoReferencia" name="pontoReferencia" value={form.pontoReferencia} onChange={handleChange} placeholder="Em frente ao parque" />
             </div>
-            <button type="submit" disabled={loading}>
-              {loading ? "Cadastrando..." : "Cadastrar Doador"}
-            </button>
+            
+            {/* NOVO GRUPO DE BOTÕES */}
+            <div className={styles.buttonGroup}>
+              <button 
+                type="button" 
+                className={styles.cancelButton}
+                onClick={() => window.history.back()}
+                disabled={loading}
+              >
+                Cancelar
+              </button>
+              
+              <button 
+                type="submit" 
+                className={styles.submitButton}
+                disabled={loading}
+              >
+                {loading ? "Cadastrando..." : "Cadastrar Doador"}
+              </button>
+            </div>
+
             {error && <div className={styles.errorMessage}>{error}</div>}
           </form>
         </div>
