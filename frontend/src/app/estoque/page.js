@@ -4,9 +4,10 @@ import Navigation from "../components/navegation/navegation";
 import styles from "./estoque.module.css";
 import { useState, useEffect } from "react";
 
-const API_URL = "http://localhost:8080/api/items";
-const CATEGORIES_URL = "http://localhost:8080/api/categories";
-const SIZES_URL = "http://localhost:8080/api/sizes";
+const BASE_API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+const API_URL = `${BASE_API}/items`;
+const CATEGORIES_URL = `${BASE_API}/categories`;
+const SIZES_URL = `${BASE_API}/sizes`;
 
 export default function EstoquePage() {
   const [itens, setItens] = useState([]);
@@ -32,22 +33,38 @@ export default function EstoquePage() {
   });
   const hasNotification = false;
 
-  // Carrega itens, categorias e tamanhos do backend
+  // Carrega itens, categorias e tamanhos do backend (com tratamento de erros)
+  const [fetchError, setFetchError] = useState(null);
+
   useEffect(() => {
-    fetch(API_URL)
-      .then((res) => res.json())
-      .then((data) => setItens(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Erro ao carregar itens:", err));
+    let mounted = true;
 
-    fetch(CATEGORIES_URL)
-      .then((res) => res.json())
-      .then((data) => setCategories(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Erro ao carregar categorias:", err));
+    async function loadAll() {
+      try {
+        const resItems = await fetch(API_URL);
+        if (!resItems.ok) throw new Error(`Items fetch failed: ${resItems.status}`);
+        const dataItems = await resItems.json();
+        if (mounted) setItens(Array.isArray(dataItems) ? dataItems : []);
 
-    fetch(SIZES_URL)
-      .then((res) => res.json())
-      .then((data) => setSizes(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Erro ao carregar tamanhos:", err));
+        const resCats = await fetch(CATEGORIES_URL);
+        if (!resCats.ok) throw new Error(`Categories fetch failed: ${resCats.status}`);
+        const dataCats = await resCats.json();
+        if (mounted) setCategories(Array.isArray(dataCats) ? dataCats : []);
+
+        const resSizes = await fetch(SIZES_URL);
+        if (!resSizes.ok) throw new Error(`Sizes fetch failed: ${resSizes.status}`);
+        const dataSizes = await resSizes.json();
+        if (mounted) setSizes(Array.isArray(dataSizes) ? dataSizes : []);
+
+        if (mounted) setFetchError(null);
+      } catch (err) {
+        console.error("Erro ao carregar dados do backend:", err);
+        if (mounted) setFetchError(err.message || "Falha ao buscar dados");
+      }
+    }
+
+    loadAll();
+    return () => { mounted = false; };
   }, []);
 
   async function handleAddProduto(e) {
@@ -139,6 +156,18 @@ export default function EstoquePage() {
         <MenuBar hasNotification={hasNotification} />
         <main className={styles.main}>
           <h1 className={styles.titulo}>Controle de Estoque</h1>
+          {fetchError && (
+            <div style={{
+              background: 'var(--color-bg-alt)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text)',
+              padding: 12,
+              borderRadius: 8,
+              marginBottom: 16,
+            }}>
+              Falha ao carregar dados: {fetchError}. Verifique se o backend está rodando em {BASE_API} e se o CORS permite conexões.
+            </div>
+          )}
           <div style={{ width: "100%", display: "flex", justifyContent: "flex-end", marginBottom: 24 }}>
             <button className={`${styles.btn} ${styles.btnAdicionar}`} onClick={() => setShowAddModal(true)}>
               + Adicionar Produto

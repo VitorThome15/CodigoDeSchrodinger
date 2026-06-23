@@ -1,11 +1,11 @@
 .container {
   min-height: 100vh;
-  background: #f5f6fa;
+  background: var(--color-bg);
   margin-left: 220px; /* largura do Navigation */
 }
 
 .main {
-  padding-top: 72px; /* altura do MenuBar */
+  padding-top: 56px; /* altura do MenuBar ajustada */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,12 +16,12 @@
 .title {
   font-size: 2rem;
   margin-bottom: 16px;
-  color: #444;
+  color: var(--color-text);
 }
 
 .description {
   font-size: 1.2rem;
-  color: #444;
+  color: var(--color-text-light);
 }
 
 .donationImage {
@@ -34,7 +34,7 @@
 
 .effectPhrase {
   font-size: 1.3rem;
-  color: #1976d2;
+  color: var(--color-primary);
   font-weight: 600;
   margin-bottom: 32px;
   text-align: center;
@@ -54,21 +54,21 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
   padding: 24px 8px 16px 8px;
   text-decoration: none;
-  color: #222;
+  color: var(--color-text);
   font-size: 1.05rem;
   font-weight: 600;
   transition: box-shadow 0.2s, background 0.2s;
 }
 
 .gridNavItem:hover {
-  background: #e9eafd;
+  background: var(--color-hover-surface);
   box-shadow: 0 4px 16px rgba(25, 118, 210, 0.15);
-  color: #1976d2;
+  color: var(--color-primary);
 }
 
 .gridNavItem span {

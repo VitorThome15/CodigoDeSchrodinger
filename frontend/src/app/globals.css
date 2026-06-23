@@ -6,19 +6,30 @@
   --color-secondary-dark: #b86c0e;
   --color-bg: #f7f8fa;
   --color-bg-alt: #fff;
+  --color-surface: #f5f6fa;
+  --color-input-bg: #fafafa;
   --color-text: #18132b;
   --color-text-light: #444;
+  --color-muted: #b0b4be;
   --color-border: #bfc9d9;
   --color-border-light: #e5e7eb;
+  --color-hover-surface: #e9eafd;
   --color-error: #c0392b;
   --color-success: #43a047;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root[data-theme='dark'] {
+  --color-bg: #0f172a;
+  --color-bg-alt: #111827;
+  --color-surface: #172033;
+  --color-text: #e5e7eb;
+  --color-text-light: #cbd5e1;
+  --color-muted: #94a3b8;
+  --color-border: #334155;
+  --color-border-light: #243245;
+  --color-hover-surface: #1f2a44;
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
 
 html,
@@ -55,7 +66,7 @@ input, select, textarea {
   border-radius: 8px;
   border: 1.5px solid var(--color-border);
   padding: 12px 14px;
-  background: var(--color-bg);
+  background: var(--color-input-bg);
   color: var(--color-text);
   transition: border 0.2s, box-shadow 0.2s;
   outline: none;
@@ -63,7 +74,7 @@ input, select, textarea {
 }
 input:focus, select:focus, textarea:focus {
   border: 1.5px solid var(--color-primary);
-  background: var(--color-bg-alt);
+  background: var(--color-input-bg);
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.08);
 }
 

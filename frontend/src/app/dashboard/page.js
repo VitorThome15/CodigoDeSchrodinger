@@ -106,7 +106,7 @@ export default function DashboardPage() {
   return (
     <>
       <Navigation />
-      <div style={{ minHeight: "100vh", background: "#fff", marginLeft: 220 }}>
+      <div style={{ minHeight: "100vh", background: "var(--color-bg)", marginLeft: 220 }}>
         <MenuBar />
         <main
           style={{
@@ -116,7 +116,7 @@ export default function DashboardPage() {
             padding: "40px",
           }}
         >
-          <h2 style={{ color: "#0070f3", marginBottom: "30px" }}>Dashboard</h2>
+          <h2 style={{ color: "var(--color-primary)", marginBottom: "30px" }}>Dashboard</h2>
 
           {/* Cards */}
           <div
@@ -143,10 +143,10 @@ export default function DashboardPage() {
           {/* Gráfico */}
           <div
             style={{
-              background: "#f9fafb",
+              background: "#fff",
               borderRadius: "12px",
               padding: "20px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              boxShadow: "var(--card-shadow)",
               width: "100%",
               maxWidth: "800px",
               marginBottom: "40px",
@@ -168,7 +168,7 @@ export default function DashboardPage() {
           {/* Últimas ações */}
           <div
             style={{
-              background: "#f9fafb",
+              background: "var(--color-bg-alt)",
               borderRadius: "12px",
               padding: "20px",
               width: "100%",
@@ -176,7 +176,7 @@ export default function DashboardPage() {
               boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             }}
           >
-            <h3 style={{ marginBottom: "15px", color: "#374151" }}>
+            <h3 style={{ marginBottom: "15px", color: "var(--color-text)" }}>
               Últimas Ações
             </h3>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -184,7 +184,7 @@ export default function DashboardPage() {
                 <tr
                   style={{
                     textAlign: "left",
-                    borderBottom: "2px solid #e5e7eb",
+                    borderBottom: "2px solid var(--color-border-light)",
                   }}
                 >
                   <th style={{ padding: "10px" }}>Usuário</th>
@@ -197,7 +197,7 @@ export default function DashboardPage() {
                   <tr>
                     <td
                       colSpan={3}
-                      style={{ padding: "10px", color: "#6b7280" }}
+                      style={{ padding: "10px", color: "var(--color-text-light)" }}
                     >
                       Sem registros recentes.
                     </td>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
                   recentActions.map((a, index) => (
                     <tr
                       key={index}
-                      style={{ borderBottom: "1px solid #e5e7eb" }}
+                      style={{ borderBottom: "1px solid var(--color-border-light)" }}
                     >
                       <td style={{ padding: "10px" }}>{a.user ?? "—"}</td>
                       <td style={{ padding: "10px" }}>{a.action ?? "—"}</td>
@@ -250,7 +250,11 @@ function groupByMonth(donations, monthsBack = 4) {
 
   (donations ?? []).forEach((don) => {
     if (!don?.date) return;
-    const dt = new Date(d.date);
+    
+    // ❌ ANTES: const dt = new Date(d.date);
+    // documentado como o erro que quebrava o ecrã:
+    const dt = new Date(don.date); //  CORREÇÃO: usar 'don' em vez de 'd'
+    
     if (isNaN(dt.getTime())) return;
     const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
     const b = buckets.find((x) => x.key === key);

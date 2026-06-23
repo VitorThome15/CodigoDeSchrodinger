@@ -1,7 +1,9 @@
+"use client";
 import Link from 'next/link';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import styles from './navegation.module.css';
-import { FaHome, FaUserPlus, FaBoxes, FaHandHoldingHeart, FaUsers, FaUserFriends, FaChartBar, FaCog, FaUser, FaQuestionCircle } from 'react-icons/fa';
+import { FaHome, FaUserPlus, FaBoxes, FaHandHoldingHeart, FaUsers, FaUserFriends, FaChartBar, FaCog, FaUser, FaQuestionCircle, FaMoon, FaSun } from 'react-icons/fa';
 
 const menuIcons = {
     Home: <FaHome />,
@@ -18,6 +20,23 @@ const menuIcons = {
 };
 
 export default function Navigation() {
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    useEffect(() => {
+        const savedTheme = window.localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+        setIsDarkMode(theme === 'dark');
+        document.documentElement.setAttribute('data-theme', theme);
+    }, []);
+
+    function toggleTheme() {
+        const nextTheme = isDarkMode ? 'light' : 'dark';
+        setIsDarkMode(!isDarkMode);
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        window.localStorage.setItem('theme', nextTheme);
+    }
+
     return (
         <aside className={styles.sidebar}>
             <div className={styles.logoContainer}>
@@ -34,13 +53,12 @@ export default function Navigation() {
                 <Link href="/cadastrobeneficiario/lista" className={styles.menuItem}>{menuIcons.Beneficiários} Beneficiários</Link>
                 <Link href="/cadastrovoluntario/lista" className={styles.menuItem}>{menuIcons.Voluntários} Voluntários</Link>
             </nav>
-            <div className={styles.sectionTitle}>OTHERS</div>
-            <nav className={styles.menuSection}>
-                <Link href="/relatorios" className={styles.menuItem}>{menuIcons.Relatórios} Relatórios</Link>
-                <Link href="/configuracoes" className={styles.menuItem}>{menuIcons.Configurações} Configurações</Link>
-                <Link href="/usuarios" className={styles.menuItem}>{menuIcons.Usuários} Usuários</Link>
-                <Link href="/ajuda" className={styles.menuItem}>{menuIcons.Ajuda} Ajuda</Link>
-            </nav>
+            <div className={styles.sidebarFooter}>
+                <button type="button" className={styles.themeButton} onClick={toggleTheme} aria-label="Alternar modo escuro">
+                    {isDarkMode ? <FaSun /> : <FaMoon />}
+                    <span>{isDarkMode ? 'Modo claro' : 'Modo escuro'}</span>
+                </button>
+            </div>
         </aside>
     );
 }
