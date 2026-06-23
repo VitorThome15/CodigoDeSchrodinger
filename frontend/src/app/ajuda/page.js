@@ -20,6 +20,7 @@ export default function AjudaPage() {
   const [novaDuvida, setNovaDuvida] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [showMensagem, setShowMensagem] = useState(false);
+  const [loading, setLoading] = useState(false); // Novo estado para controle de envio
   const router = useRouter();
 
   const toggleDuvida = (idx) => {
@@ -28,12 +29,49 @@ export default function AjudaPage() {
     );
   };
 
-  const handleEnviar = () => {
+  const handleEnviar = async () => {
     if (novaDuvida.trim() !== "") {
-      setMensagem("duvida registrada, logo responderemos");
-      setNovaDuvida("");
-      setShowMensagem(true);
-      setTimeout(() => setShowMensagem(false), 4000);
+      setLoading(true);
+
+      try {
+        // Puxa o nome e e-mail do usuário logado na memória do navegador
+        // Se por acaso não achar, usa um valor padrão
+        const userName = localStorage.getItem("username") || "Usuário Desconhecido";
+        const userEmail = localStorage.getItem("userEmail") || "sem_email@sistema.com";
+
+        // Puxa o token salvo no login 
+        const token = localStorage.getItem("token") || ""; 
+
+        const response = await fetch("http://localhost:8080/api/help", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // <--- Enviando a "chave" de acesso
+          },
+          body: JSON.stringify({
+            name: userName,
+            email: userEmail,
+            message: novaDuvida
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Falha ao enviar para o servidor.");
+        }
+
+        setMensagem("Dúvida registrada com sucesso! Logo responderemos.");
+        setNovaDuvida("");
+        setShowMensagem(true);
+        setTimeout(() => setShowMensagem(false), 4000);
+
+      } catch (error) {
+        console.error("Erro:", error);
+        setMensagem("Erro ao enviar a dúvida. Tente novamente mais tarde.");
+        setShowMensagem(true);
+        setTimeout(() => setShowMensagem(false), 4000);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -92,6 +130,7 @@ export default function AjudaPage() {
                 placeholder="digite aqui a sua duvida"
                 value={novaDuvida}
                 onChange={e => setNovaDuvida(e.target.value)}
+                disabled={loading}
                 style={{
                   width: '100%',
                   minHeight: 80,
@@ -102,27 +141,29 @@ export default function AjudaPage() {
                   resize: 'vertical',
                   background: '#fafafa',
                   color: '#222',
-                  opacity: 0.9
+                  opacity: loading ? 0.6 : 0.9
                 }}
               />
               <button
                 onClick={handleEnviar}
+                disabled={loading || novaDuvida.trim() === ""}
                 style={{
                   marginTop: 12,
                   padding: '10px 24px',
                   borderRadius: 6,
                   border: 'none',
-                  background: '#0070f3',
+                  background: (loading || novaDuvida.trim() === "") ? '#a0c4ff' : '#0070f3',
                   color: '#fff',
                   fontSize: 16,
-                  cursor: 'pointer',
-                  fontWeight: 500
+                  cursor: (loading || novaDuvida.trim() === "") ? 'not-allowed' : 'pointer',
+                  fontWeight: 500,
+                  transition: 'background 0.3s'
                 }}
               >
-                Enviar
+                {loading ? "Enviando..." : "Enviar"}
               </button>
             </div>
-            {/* Botão para acompanhar dúvidas - AGORA APÓS O CAMPO DE DIGITAR */}
+            {/* Botão para acompanhar dúvidas */}
             <div style={{ width: '100%', margin: '32px 0 0 0' }}>
               <button
                 onClick={handleAcompanhar}
